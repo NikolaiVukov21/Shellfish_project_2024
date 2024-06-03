@@ -41,4 +41,9 @@
 
 ### - Results 
 
+## Additional Links & Resources:
+- [3D boundary boxing paper](https://arxiv.org/pdf/1612.00496)
+- [3D boundary boxing GitHub](https://github.com/skhadem/3D-BoundingBox/tree/master)
+- [Ultralytics YOLOv8 all-encompasing guide](https://docs.ultralytics.com/)
+- 
 
