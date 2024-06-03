@@ -6,7 +6,7 @@
 -[NSF REU Salisbury Homepage](http://faculty.salisbury.edu/~ealu/REU/Schedule.html)
 
 ## Faculty Mentors:
-### - Dr. Yuanwei Jin (Major, College)
+### - Dr. Yuanwei Jin (Engineering Professor, University Maryland)
 ### - Dr. Enyue (Annie) Lu (Computer Science Professor, Salisbury University)
 
 ## Project Title:
@@ -14,9 +14,12 @@
 *(insert Title Here)*
 
 ## Contributors:
-### - Joshua Essandoh (Computer Engineer, Virgina Tech)
+### - Joshua Essandoh  (Computer Engineer, Virgina Tech)
 ### - Michael Straus  (Computer Science, Columbia University)
 ### - Nikolai Vukov   (Statistics Major, Salisbury University)
+
+## Previous Work Done:
+### The groups before us were able to establish a 
 
 # References & Acknowledgements: 
 - [Detecting and Counting Oysters](https://arxiv.org/abs/2105.09758)
