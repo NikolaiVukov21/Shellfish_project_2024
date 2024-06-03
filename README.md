@@ -1,4 +1,4 @@
-# Detecting the Multiple States of Oyster Activity and Orientation using Deep Learnng Image Processing and Computer Vision Algorithin
+# Detecting the Multiple States of Oyster Activity and Orientation using Deep Learnng Image Processing and Computer Vision Algorithim
 
 ## This research project was done and improved at Salisbury university as part of teh NSF REU Summer 2024 Program:
 -[Salisbury University Website](https://www.salisbury.edu/)
