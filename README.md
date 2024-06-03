@@ -19,7 +19,7 @@
 ### - Nikolai Vukov   (Statistics Major, Salisbury University)
 
 ## Previous Work Done:
-### The groups before us were able to establish a 
+### The groups before us were able to establish a program that was able to detect the status, direction and number of clams 
 
 # References & Acknowledgements: 
 - [Detecting and Counting Oysters](https://arxiv.org/abs/2105.09758)
