@@ -34,7 +34,7 @@
 ## Methods:
 
 ### - DataSet:
-
+The data set for these tests were collected using clips found through online, primarily through youtube channels (All credits can be found in References). In total we were able to collect _ videos that ranged from a few seconds still photos of a single oyster to long moving videos of multiple oysters.
 ### - Training:
 
 ### - Evaluation:
