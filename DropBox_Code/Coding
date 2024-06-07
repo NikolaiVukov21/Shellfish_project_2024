@@ -1,6 +1,6 @@
 import os, argparse, dropbox, time
 
-token = 'sl.B2veAVE6YNHVN7bBLW3VDT2VWbSY69Xs8vglHy7U6marmVFueOccpEJQW5hQeZc-t5AcLQHM9A_GhL4_Aoh5YAP4x0wCIzrTcGVAcUvrW-ImbkkhWnkV4r56sLUXRQCb7qnZMjQINhXR'
+token = 'Insert Fake Account Token Here'
 
 
 class DropBoxUpload:
