@@ -1,7 +1,7 @@
 # To-Do list:
 ## Model:
 - [x] Implement Yolov10 into new code
-- [ ] New: Fixed Error With No Files or Directory found in Jupyter Code
+- [X] New: Fixed Error With No Files or Directory found in Jupyter Code
 - [ ] get orientation of Oysters
 - [ ] Retrain Models with Videos
 
