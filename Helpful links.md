@@ -3,7 +3,7 @@
 ### YOLOv10 Github:
 -[Yolov10 Github](https://github.com/THU-MIG/yolov10)
 
-### How YOLOv10 Works:
+### Using YoloV10 on Video and imagines:
 -[YOLOv10 Inference on Images and Videos Files Using Google Colaboratory](https://www.youtube.com/watch?v=YWpMgVGk2Y8) 
 
 ### Depth program for YOLO
