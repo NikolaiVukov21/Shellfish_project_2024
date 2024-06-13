@@ -11,7 +11,8 @@
 - [ ] Create Input for imagines on website
 - [ ] Implement Yolov10 code into website
 - [ ] Create Output for process imagine
-- [ ] Figure out how we got the weights files
+- [ ] Create Powerpoint For website (optional) 
+
 
 ## Misc:
 - [ ] Write Conference paper
