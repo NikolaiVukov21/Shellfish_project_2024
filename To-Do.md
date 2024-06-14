@@ -16,4 +16,4 @@
 
 ## Misc:
 - [ ] Write Conference paper
-- [ ] Test Chatgpt Code for website (Do Not Use)
+- [X] Test Chatgpt Code for website (Do Not Use)
