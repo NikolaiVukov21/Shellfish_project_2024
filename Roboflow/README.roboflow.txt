@@ -1,8 +1,8 @@
 
-Oyt - v2 2024-06-12 11:19am
+oysters - v7 2023-06-20 10:01am
 ==============================
 
-This dataset was exported via roboflow.com on June 12, 2024 at 5:37 PM GMT
+This dataset was exported via roboflow.com on June 20, 2023 at 2:04 PM GMT
 
 Roboflow is an end-to-end computer vision platform that helps you
 * collaborate with your team on computer vision projects
@@ -17,12 +17,10 @@ visit https://github.com/roboflow/notebooks
 
 To find over 100k other datasets and pre-trained models, visit https://universe.roboflow.com
 
-The dataset includes 1048 images.
-Oysters are annotated in YOLOv9 format.
+The dataset includes 999 images.
+Oysters are annotated in COCO format.
 
 The following pre-processing was applied to each image:
-* Auto-orientation of pixel data (with EXIF-orientation stripping)
-* Resize to 640x640 (Stretch)
 
 No image augmentation techniques were applied.
 
