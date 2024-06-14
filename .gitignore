@@ -10,5 +10,9 @@ Jupyter_local_code/Copy_of_train_yolov10_object_detection-checkpoint.ipynb
 *-checkpoint.ipynb
 test.txt
 *.ipynb_checkpoints
+*.mp4
+*.MP4
+*.Mp4
+*.mP4
 
 
