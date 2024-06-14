@@ -11,8 +11,9 @@
 - [ ] Create Input for imagines on website
 - [ ] Implement Yolov10 code into website
 - [ ] Create Output for process imagine
-- [ ] Create Powerpoint For website (optional) 
+- [ ] Create Powerpoint For website (optional)
 
 
 ## Misc:
 - [ ] Write Conference paper
+- [ ] Test Chatgpt Code for website (Do Not Use)
