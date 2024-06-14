@@ -22,4 +22,4 @@
 - [X] Test Chatgpt Code for website (Do Not Use)
       
 >[!Note]
->While this was put on the to-do list as a joke, the project did not utilzie or use ChatGPT to write any code.
+>While this was put on the to-do list as a joke, the project did not utilize or use ChatGPT to write any code.
