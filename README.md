@@ -11,7 +11,7 @@
 
 ## Project Title: 
     
-## Real-Time Identification of Oysters using Learning Algorthims and Machine Learning.
+### Real-Time Identification of Oysters using Learning Algorthims and Machine Learning.
 
 ## Contributors:
 ### - Joshua Essandoh  (Computer Engineer, Virgina Tech)
