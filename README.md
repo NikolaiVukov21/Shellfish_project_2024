@@ -9,9 +9,9 @@
 ### - Dr. Yuanwei Jin (Engineering Professor, University Maryland)
 ### - Dr. Enyue (Annie) Lu (Computer Science Professor, Salisbury University)
 
-## Project Title:
+## Project Title: Real-Time Identification of Oysters using Algorthims and Machine Learning Techniques
     
-*(insert Title Here)*
+## Utilizing Machine learning to Track and Identify the State of Oysters in Real time
 
 ## Contributors:
 ### - Joshua Essandoh  (Computer Engineer, Virgina Tech)
