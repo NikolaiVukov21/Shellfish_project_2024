@@ -2,7 +2,8 @@
 ## Model:
 - [x] Implement Yolov10 into new code
 - [X] ~~New: Fixed Error With No Files or Directory found in Jupyter Code~~
-- [ ] Retrain Models with Videos
+- [X] Retrain Models with Videos
+- [X] Get Confidence level of Oysters
 - [ ] Get orientation of Oysters
 
 ## Website:
@@ -16,6 +17,7 @@
 
 
 ## Misc:
+- [ ] Write Progress report I *Due: 6/27/24*
 - [ ] Write Conference paper
 
 
