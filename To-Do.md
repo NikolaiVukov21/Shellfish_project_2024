@@ -17,7 +17,7 @@
 
 
 ## Misc:
-- [ ] Write Progress report I *Due: 6/27/24*
+- [ ] Write Progress report I | *Due: 6/27/24*
 - [ ] Write Conference paper
 
 
