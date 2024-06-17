@@ -6,8 +6,8 @@
 -[NSF REU Salisbury Homepage](http://faculty.salisbury.edu/~ealu/REU/Schedule.html)
 
 ## Faculty Mentors:
-### - Dr. Yuanwei Jin (Engineering Professor, University Maryland)
-### - Dr. Enyue (Annie) Lu (Computer Science Professor, Salisbury University)
+ - Dr. Yuanwei Jin (Engineering Professor, University Maryland)
+ - - Dr. Enyue (Annie) Lu (Computer Science Professor, Salisbury University)
 
 ## Project Title: 
     
