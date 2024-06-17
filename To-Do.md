@@ -18,6 +18,8 @@
 
 ## Misc:
 - [ ] Write Progress report I | *Due: 6/27/24*
+- [ ] Write Progress report II| *Due: 7/11/24*
+- [ ] Write Final Report | *Due: 8/6/24*
 - [ ] Write Conference paper
 
 
