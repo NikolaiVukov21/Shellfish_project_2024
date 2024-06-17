@@ -11,7 +11,7 @@
 
 ## Project Title: 
     
-### Identification of Oysters in Imagines and Videos using Machine Learning
+Identification of Oysters in Imagines and Videos using Machine Learning
 
 ## Contributors:
 ### - Joshua Essandoh  (Computer Engineer, Virgina Tech)
