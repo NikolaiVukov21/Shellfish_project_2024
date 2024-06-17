@@ -6,7 +6,7 @@
 - [ ] Get orientation of Oysters
 
 ## Website:
-- [x] Create Dropbox Link to Process files
+- [x] ~~Create Dropbox Link to Process files~~
 - [X] Create a website Frame
 - [ ] Create Input for imagines on website
 - [ ] Create SQL database
