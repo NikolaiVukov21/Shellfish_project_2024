@@ -9,11 +9,11 @@
 ## Website:
 - [x] ~~Create Dropbox Link to Process files~~
 - [X] Create a website Frame
-- [ ] Create Input for imagines on website
+- [X] Create Input for imagines on website
 - [ ] Create SQL database
 - [ ] Implement Yolov10 code into website
 - [ ] Create Output for process imagine
-- [ ] Create Powerpoint For website (optional)
+- [ ] Create Powerpoint For website
 
 
 ## Reports:
