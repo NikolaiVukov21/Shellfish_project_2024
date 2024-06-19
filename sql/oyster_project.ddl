@@ -1,6 +1,6 @@
-drop schema if exists test_db;
-create schema test_db;
-use test_db;
+drop schema if exists test_4;
+create schema test_4;
+use test_4;
 
 
 create table people
@@ -13,7 +13,7 @@ create table people
 
 create table models
 (
-    Model_ID               int as (NULL) stored
+    Model_ID               int auto_increment
         primary key,
     Username               varchar(64)   not null,
     Timestamp_Created      timestamp     not null,
@@ -30,16 +30,17 @@ create table models
 
 create table raw_files
 (
-    Raw_File_ID int as (NULL) stored
+    Raw_File_ID   int auto_increment
         primary key,
-    Username    varchar(64)   not null,
-    Filepath    varchar(2048) not null,
-    Size        varchar(64)   not null,
-    Type        varchar(64)   not null,
-    Extension   varchar(64)   not null,
-    Notes       varchar(2048) not null,
-    Width       int           not null,
-    Height      int           not null,
+    Username      varchar(64)   not null,
+    Filepath      varchar(2048) not null,
+    Size          varchar(64)   not null,
+    Type          varchar(64)   not null,
+    Extension     varchar(64)   not null,
+    Notes         varchar(2048) not null,
+    Width         int           not null,
+    Height        int           not null,
+    Time_Uploaded timestamp     not null,
     constraint username_2
         foreign key (Username) references people (Username)
 );
@@ -51,13 +52,13 @@ create table annotated_files
     Annotated_Filepath varchar(2048) not null,
     Time_to_Annotate   time          not null,
     Notes              varchar(2048) not null,
-    Ann_File_ID        int as (NULL) stored
+    Ann_File_ID        int auto_increment
         primary key,
     constraint annotated_files_pk
         unique (Raw_File_ID, Model_ID),
-    constraint `annotated_files_models_Model ID_fk`
+    constraint annotated_files_models_Model_ID_fk
         foreign key (Model_ID) references models (Model_ID),
-    constraint annotated_files_raw_files_File_ID_fk
+    constraint annotated_files_raw_files_Raw_File_ID_fk
         foreign key (Raw_File_ID) references raw_files (Raw_File_ID)
 );
 
@@ -99,7 +100,7 @@ create table videos
         primary key,
     FPS         float      not null,
     Color_Order varchar(5) null,
-    constraint File_id_videos_fk
+    constraint videos_raw_files_Raw_File_ID_fk
         foreign key (Raw_File_ID) references raw_files (Raw_File_ID)
 );
 
