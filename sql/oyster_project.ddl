@@ -1,14 +1,14 @@
-DROP SCHEMA IF EXISTS test_2;
-create schema test_2;
-use test_2;
+drop schema if exists test_db;
+create schema test_db;
+use test_db;
 
 
 create table people
 (
-    Username    varchar(64) not null
+    Username     varchar(64) not null
         primary key,
-    Password    varchar(64) null,
-    Day_Created timestamp   not null
+    Password     varchar(64) null,
+    Time_Created timestamp   not null
 );
 
 create table models
