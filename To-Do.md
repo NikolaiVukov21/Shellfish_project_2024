@@ -24,5 +24,5 @@
 
 
 ## Fun:
--[ ] Take off 4th of july
--[ ] 
+- [ ] Take off 4th of july
+- [ ] 
