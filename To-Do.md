@@ -24,7 +24,5 @@
 
 
 ## Fun:
-- [X] Test Chatgpt Code for website (Do Not Use)
-      
->[!Warning]
->While this was put on the to-do list as a joke, the project did not utilize or use ChatGPT to write any code.
+-[ ] Take off 4th of july
+-[ ] 
