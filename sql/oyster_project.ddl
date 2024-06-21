@@ -33,14 +33,16 @@ create index raw_files_people_Username_fk
 
 create table roboflow
 (
-    Roboflow_ID int auto_increment
+    Roboflow_ID      int auto_increment
         primary key,
-    Api_Key     varchar(64) not null,
-    Workspace   varchar(64) null,
-    Project     varchar(64) null,
-    Version     int         null,
-    Download    varchar(64) null,
-    Username    varchar(64) not null,
+    Api_Key          varchar(64)   not null,
+    Workspace        varchar(64)   not null,
+    Project          varchar(64)   not null,
+    Version          int           not null,
+    Download         varchar(64)   not null,
+    Username         varchar(64)   not null,
+    Timestamp        timestamp     not null,
+    Dataset_Location varchar(2048) not null,
     constraint roboflow_ibfk_1
         foreign key (Username) references people (Username)
 );
