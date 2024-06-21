@@ -16,3 +16,5 @@ test.txt
 *.mP4
 "Oyster Test Videos"
 Roboflow/
+sql/Files
+sql/runs

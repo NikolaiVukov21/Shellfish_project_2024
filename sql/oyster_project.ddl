@@ -11,23 +11,6 @@ create table people
     Time_Created timestamp   not null
 );
 
-create table models
-(
-    Model_ID               int auto_increment
-        primary key,
-    Username               varchar(64)   not null,
-    Timestamp_Created      timestamp     not null,
-    Model_Points_Path      varchar(64)   not null,
-    Version                int           not null,
-    Hyperparams            varchar(2048) not null,
-    Model_Type             varchar(64)   not null,
-    Width_Training_Images  int           not null,
-    Height_Training_Images int           not null,
-    Roboflow_Link          varchar(2048) not null,
-    constraint Username
-        foreign key (Username) references people (Username)
-);
-
 create table raw_files
 (
     Raw_File_ID   int auto_increment
@@ -43,6 +26,39 @@ create table raw_files
     Time_Uploaded timestamp     not null,
     constraint username_2
         foreign key (Username) references people (Username)
+);
+
+create index raw_files_people_Username_fk
+    on raw_files (Username);
+
+create table roboflow
+(
+    Roboflow_ID int auto_increment
+        primary key,
+    Api_Key     varchar(64) not null,
+    Workspace   varchar(64) null,
+    Project     varchar(64) null,
+    Version     int         null,
+    Download    varchar(64) null,
+    Username    varchar(64) not null,
+    constraint roboflow_ibfk_1
+        foreign key (Username) references people (Username)
+);
+
+create table models
+(
+    Model_ID               int auto_increment
+        primary key,
+    Timestamp_Created      timestamp     not null,
+    Model_Points_Path      varchar(64)   not null,
+    Version                int           not null,
+    Hyperparams            varchar(2048) not null,
+    Model_Type             varchar(64)   not null,
+    Width_Training_Images  int           not null,
+    Height_Training_Images int           not null,
+    Roboflow_ID            int           not null,
+    constraint models_roboflow_Roboflow_ID_fk
+        foreign key (Roboflow_ID) references roboflow (Roboflow_ID)
 );
 
 create table annotated_files
@@ -91,8 +107,8 @@ create table oysters_in_photo
         foreign key (Ann_File_ID) references annotated_photos (Ann_File_ID)
 );
 
-create index raw_files_people_Username_fk
-    on raw_files (Username);
+create index Username
+    on roboflow (Username);
 
 create table videos
 (
