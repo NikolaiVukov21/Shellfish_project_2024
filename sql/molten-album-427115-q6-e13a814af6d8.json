@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "molten-album-427115-q6",
+  "private_key_id": "e13a814af6d892a743443f3e37a63bb68813dcde",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDCpC0/NQHI0yNr\n7i/8AtS2pU2WFtsHU6ajhZLiMvrkhZL+cvGgOZMqbj1FxhtrpD3gmFNrnhObjuIY\nJfBpCMRIWOOeNs87Lmrvpx/LcJsqaqsaOj1aVkMndCueM87eVJXqKHtqlz0DxYlw\nlxbvYyb3ESO6AgXLI7LlLFuUr+llvjSdvJuDHszCiGWEVWUoDicVvv/OSQoGAKc7\nZL2w4vO/m0k0Le1eAnBc429XYZccCDqFJ79Ci0rnqgcP9Q/de8ZKP8/OZzy6Coiy\n/MlQxnDR/TqvdHfQ8MT50WCkoyshyuNBvH8jUt1aHRpIqFeApkmCQkPBhnRZ18by\nBrC++RGLAgMBAAECggEAQNuQMDWriI3Cid5uot0WoF3owpCPH5viNS73SOSP8cII\nvzzyAt/siAD/7dYboPyzmbloYr3j7rvn3wAVYgqHzUvBXSEKYMAQ5hacY5/8NGAi\n77RkaUvBSM5PEoJU9oTdB4/BwDzxGeai65+NBuvVOhK+AudVouEcZX0obx1G+p2Y\nCvrV8YoKg4ZK6yWtFs7w/JOxD7FYAN6OhsblN9aXVDfP8C3dFhSkPsUJzzjYXXHF\nj70EqTNVEMFzpSTojPIoq/y0EqcxrVfpjy1z2NPAyug3Tk2XXpgpKvGZc2hCv+wx\nw3uC6mGFzQajDwNxc8ASi10QQS56ytUYVPiMvwAzQQKBgQDfdUjSTCMCQjBjl8tQ\nFDUXXQ4Vp33YlXbKYaxZLmwyISOejQ4FcyLE0ijRRZ0oMa/Hlm6E8i53AyiNvRVF\nBQZQZ8TdWjXpvQFW7OlAuT8k6K1nV0ROoSW3N0BzOfz3yZcC4E5u+i0kPC0PXuGe\n8KfZYzRDR51hvRT383TMLxr1uwKBgQDe/JNhKOqg3hGkjDIEzP7hlivpzpxmVHHE\nl6Jyo3oqaQum5tP5mI9pqtWGpPkerpTnHC1lGWIfjL5hWwbVHcdKEEbByfDkdezQ\noHVD6smmwSNY4htSYMasGNwKsCUJxhR8n9OZsUobssOE1U10vpXeQDYHD72+96L0\nw54ud5EucQKBgG/NaK//dAyvPTK3QfxBAAc+gcuHz8lLjvHXSLoeJfg26HFttbQ4\nVQ8Q72c1Y1o28fH0bDuMSH83T1ULY9bymqQkJzVw60SVUlRBmLrPdK5s1EW+Pejx\na8Ntm4uLWexIKow/2j5gYbGdghYMrOovEmwL3JxE+pNqXVFpt+hpMR39AoGBAKJ8\n0rheJHsM1zZcoqY06xZfY6iAUh+PMUfcZxe6YG8/FKqOUbDzpq2NOwNee9oLxZ2T\nPtEI6iOrX595wUTS6kHiEm1sRgl0lRiBlHHlSQQmgSdnvBkPRDZr9wwixxqUKKGX\npY29Tw9X+Hl3JXYI2xSVHcmPgukBctGBKmcZ4cVBAoGAIzNhwtXrNIBcNKeOlk8H\nWtCDb4QsVY5vfAlo22I2E5WVaBlQ794aJBM1Zt5UPW/Emk6Bw1BkesxtdMbi49z/\n2T0Hazy6utZkFdk30C7Cl4s/SwqoWbKEIP/xrjPqF78PZUDLy0mkwzHe+SC++MYv\nCJbsRkDledgb+mhABbtpzMQ=\n-----END PRIVATE KEY-----\n",
+  "client_email": "cloud-storage-sa@molten-album-427115-q6.iam.gserviceaccount.com",
+  "client_id": "105767049463355191586",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/cloud-storage-sa%40molten-album-427115-q6.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}

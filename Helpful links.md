@@ -12,3 +12,6 @@
 ### Training YOLOv10 for Videos:
 
 -[YoloV10 Video tutorial](https://www.linkedin.com/posts/pyresearch_yolov10-how-to-train-for-object-detection-activity-7201118390420180992-2nX7)
+
+### How to Start a Google Storage Bucket:
+-[Bucket Link](https://medium.com/google-cloud/automating-google-cloud-storage-management-with-python-92ba64ec8ea8)
