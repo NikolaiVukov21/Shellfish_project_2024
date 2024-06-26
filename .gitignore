@@ -20,4 +20,5 @@ sql/Files/*
 sql/runs
 *.kate-swp
 molten-album-427115-q6-cfa4e4aaf3bd.json
-/sql/Files_local/Weights/
+/sql/Files_local/
+
