@@ -11,10 +11,10 @@ Then, set up Google Cloud:
 ./google-cloud-sdk/bin/gcloud init 
 (follow prompts)
 
-gcloud auth login
+./google-cloud-sdk/bin/gcloud auth login
 (go to Chrome, sign into google account)
 
-gcloud auth application-default login
+./google-cloud-sdk/bin/gcloud auth application-default login
 (essentially the same as before
 
 Ask me to add your Google account to the cloud
