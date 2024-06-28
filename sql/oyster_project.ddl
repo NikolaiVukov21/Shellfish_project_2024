@@ -24,6 +24,7 @@ create table raw_files
     Width         int           not null,
     Height        int           not null,
     Time_Uploaded timestamp     not null,
+    Local_Path    varchar(2048) not null,
     constraint username_2
         foreign key (Username) references people (Username)
 );
@@ -43,6 +44,7 @@ create table roboflow
     Username         varchar(64)   not null,
     Timestamp        timestamp     not null,
     Dataset_Location varchar(2048) not null,
+    Local_Path       varchar(2048) not null,
     constraint roboflow_ibfk_1
         foreign key (Username) references people (Username)
 );
@@ -62,21 +64,23 @@ create table models
     Epoch                  int           null,
     Batch                  int           null,
     Size                   varchar(1)    not null,
+    Local_Path             varchar(2048) not null,
     constraint models_roboflow_Roboflow_ID_fk
         foreign key (Roboflow_ID) references roboflow (Roboflow_ID)
 );
 
 create table annotated_files
 (
-    Raw_File_ID          int           not null,
-    Model_ID             int           not null,
-    Annotated_Filepath   varchar(2048) not null,
-    Time_to_Annotate     float         not null,
-    Notes                varchar(2048) null,
+    Raw_File_ID          int                          not null,
+    Model_ID             int                          not null,
+    Annotated_Filepath   varchar(2048)                not null,
+    Time_to_Annotate     float                        not null,
+    Notes                varchar(2048)                null,
     Ann_File_ID          int auto_increment
         primary key,
-    Timestamp            timestamp     not null,
-    Confidence_Threshold float         not null,
+    Timestamp            timestamp                    not null,
+    Confidence_Threshold float                        not null,
+    Local_Path           varchar(2048) default 'REPL' not null,
     constraint annotated_files_pk
         unique (Raw_File_ID, Model_ID),
     constraint annotated_files_models_Model_ID_fk
