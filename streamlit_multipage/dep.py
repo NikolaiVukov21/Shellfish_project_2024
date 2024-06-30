@@ -19,6 +19,7 @@ from gcloud import storage
 from oauth2client.service_account import ServiceAccountCredentials
 import os
 import streamlit as st
+import io
 
 temp_folder = os.path.join('.', 'Files_local')
 temp_weights = os.path.join(temp_folder, 'Weights')
@@ -33,7 +34,7 @@ sql_conn = pymysql.connect(
     user="root",
     password="dbuserdbuser",
     host="localhost",
-    port=3309,
+    port=st.session_state.PORT_NUMBER,
     database=db_main,
     cursorclass=pymysql.cursors.DictCursor,
     autocommit=True)
@@ -158,7 +159,7 @@ def get_REPLACE_ID(column_id = 'Raw_File_ID', table='raw_files', column_rep='Fil
 def get_match(pattern, string):
     matches = re.search(pattern, string)
     if matches:
-        print(matches.group(1))
+        # print(matches.group(1))
         return(matches.group(1))
     else:
         raise ValueError(f'Improper string exported, couldn\'t find {pattern} in the given text')
@@ -241,6 +242,7 @@ def add_photo(user, im, filename, notes = '', f_out = 'Files/Image_raw'):
     width = im.size[0]
     height = im.size[1]
     f_temp = get_temp_fname(filename)
+
     im.save(f_temp)
     fsize = os.stat(f_temp).st_size
     ext = get_ext(f_temp)
@@ -260,12 +262,12 @@ def add_photo(user, im, filename, notes = '', f_out = 'Files/Image_raw'):
 def get_photos(user):
     cur.execute(f"SELECT Filepath, Filename, Raw_File_ID FROM raw_files WHERE Username = '{user}';")
     res = cur.fetchall()
-    # print("Start of result")
-    # print(res)
-    # print("End of result")
-    keys = [row['Filename'] for row in res]
-    values = [row['Raw_File_ID'] for row in res]
-    return dict(zip(keys, values))
+    if res:
+        keys = [row['Filename'] for row in res]
+        values = [row['Raw_File_ID'] for row in res]
+        return dict(zip(keys, values))
+    else:
+        return dict()
 
 def get_models():
     cur.execute(f"SELECT Model_ID from models WHERE Model_Points_Path != 'REPLACE';")
@@ -278,9 +280,10 @@ def get_models():
 
     # dict(zip([res['Filepath']]))
 
-def annotate_image(input_img, model, label_annotator = la, bounding_box_annotator = bba, verbose = False, conf = True, conf_level = 0.05):
-    
-    cont_img = np.ascontiguousarray(input_img, dtype=np.uint8)
+def annotate_image(im: Image, model, label_annotator = la, bounding_box_annotator = bba, verbose = False, conf = True, conf_level = 0.05):
+    fix_img = im.convert('RGB')
+    np_img = np.array(fix_img)
+    cont_img = np.asarray(np_img, dtype=np.uint8)
     results = model(cont_img, conf=conf_level, verbose = verbose)[0]
     conf_array = np.array(results.boxes.conf.cpu())
     conf_ls_str  = [str(round(x * 100) ) + '%' for x in conf_array]
@@ -288,13 +291,13 @@ def annotate_image(input_img, model, label_annotator = la, bounding_box_annotato
     
     detections = sv.Detections.from_ultralytics(results)
     annotated_image = bounding_box_annotator.annotate(
-        scene=input_img, detections=detections)
+        scene=np_img, detections=detections)
     num_oysters = detections.xyxy.shape[0]
     annotated_image = label_annotator.annotate(
         scene=annotated_image, detections=detections, labels = conf_ls_str)
     return(annotated_image, num_oysters, tot_time, detections)
 
-def ann_img(Raw_File_ID, Model_ID, threshold = 0.3, notes = '', f_out = 'Files/Image_ann'):
+def ann_img(Raw_File_ID, Model_ID, threshold = 0.03, notes = '', f_out = 'Files/Image_ann'):
     cur.execute(f"SELECT * FROM raw_files WHERE Raw_File_ID = {Raw_File_ID}")
     cur_photo = cur.fetchall()[-1]
 
@@ -304,16 +307,16 @@ def ann_img(Raw_File_ID, Model_ID, threshold = 0.3, notes = '', f_out = 'Files/I
     cur.execute(f"SELECT * from annotated_files WHERE Model_ID = {Model_ID} AND Raw_File_ID = {Raw_File_ID}")
     res = cur.fetchall()
     if res:
-        print('Image Already Annotated')
+        st.write('Image Already Annotated')
         return res[-1]['Ann_File_ID']
     
     download_file_g(cur_photo['Filepath'], cur_photo['Local_Path'])
     im = Image.open(cur_photo['Local_Path'])
-    np_img = np.array(im)
+    
 
     download_file_g(cur_model['Model_Points_Path'], cur_model['Local_Path'])
     model = YOLOv10(cur_model['Local_Path'])
-    annot, num_oysters, tot_time, end_ann_data = annotate_image(np_img, model, conf_level = threshold)
+    annot, num_oysters, tot_time, end_ann_data = annotate_image(im, model, conf_level = threshold)
 
     cur.execute(f"INSERT INTO annotated_files (Raw_File_ID, Model_ID, Annotated_Filepath, Time_to_Annotate, Confidence_Threshold, Notes, Timestamp) VALUES ('{Raw_File_ID}', '{Model_ID}', 'REPLACE', '{tot_time}', {threshold}, '{notes}', CURRENT_TIMESTAMP);")
     id = get_REPLACE_ID(column_id = 'Ann_File_ID', table='annotated_files', column_rep='Annotated_Filepath')
@@ -341,9 +344,68 @@ def ann_img(Raw_File_ID, Model_ID, threshold = 0.3, notes = '', f_out = 'Files/I
         cur.execute(f"INSERT INTO oysters_in_photo (Ann_File_ID, Confidence, X1, Y1, X2, Y2, Class, Class_Index) VALUES ({id}, {conf[idx]}, {coord_cur[0]}, {coord_cur[1]}, {coord_cur[2]}, {coord_cur[3]}, '{names[idx]}', {class_num[idx]});")
     return id
 
+# ann_img(66, 28)
+
 def get_fpath_ann(ann_id):
-    cur.execute(f"SELECT Local_Path from annotated_files WHERE Ann_File_ID = {ann_id}")
-    res = cur.fetchall()
-    return res[-1]['Local_Path']
+    cur.execute(f"SELECT Local_Path, Annotated_Filepath from annotated_files WHERE Ann_File_ID = {ann_id}")
+    res = cur.fetchall()[-1]
+    download_file_g(res['Annotated_Filepath'], res['Local_Path'])
+    return res['Local_Path']
 # ann_photo_id = ann_img(id_raw_photo, id_mod)
 
+def download_roboflow(api_key, workspace, project, version, download, location):
+    # if not os.path.exists(folder_roboflow):
+    with st.spinner(f"Loading RoboFlow data from {workspace}"):
+        rf = Roboflow(api_key = api_key)
+        project = rf.workspace(workspace).project(project)
+        version = project.version(version)
+        dat = version.download(download, location = location)
+        
+        fpath = os.path.join(location, 'data.yaml')
+        
+        with open(fpath) as f1:
+            lines = f1.readlines()
+        with open(fpath, 'w') as f2:
+            f2.writelines(lines[:-4])
+            f2.write("test: ../test/images\ntrain: ../train/images\nval: ../valid/images\n\n")
+
+def add_roboflow(name, export_string, f_out = 'Files/Roboflow', f_weights = "Files/Weights", load = False):
+    
+    '''
+    Returns: Index of added roboflow if successful, 0 if not
+    '''
+    pattern_api = r'api_key\s*=\s*"([^"]+)"'
+    api_key_lab = get_match(pattern_api, export_string)
+
+    pattern_workspace = r'rf\.workspace\("([^"]+)"\)'
+    workspace_lab = get_match(pattern_workspace, export_string)
+
+    pattern_project = r'project\("([^"]+)"\)'
+    project_lab = get_match(pattern_project, export_string)
+
+    pattern_version = r'version\((\d+)\)'
+    version_lab = get_match(pattern_version, export_string)
+
+    pattern_download = r'\bdownload\("([^"]+)"\)'
+    download_lab = get_match(pattern_download, export_string)
+    
+#     f_temp = get_temp_fname(f_out)
+    folder_name = f'{workspace_lab}_{project_lab}_{version_lab}_{download_lab}'
+    f_temp = os.path.join(temp_folder, folder_name)
+    
+    folder_g = os.path.join(f_out, folder_name)
+#     folder_roboflow = f"{f_out}/{workspace_lab}_{project_lab}_{version_lab}_{download_lab}"
+    # print(api_key_lab, workspace_lab, project_lab, version_lab, download_lab, f_temp)
+    if load:
+        download_roboflow(api_key_lab, workspace_lab, project_lab, version_lab, download_lab, f_temp)
+    
+    upload_folder_g(f_temp, folder_g)
+    
+    cur.execute(f"INSERT INTO roboflow (Api_Key, Workspace, Project, Version, Download, Dataset_Location, Local_Path, Username, Timestamp) VALUES ('REPLACE', '{workspace_lab}', '{project_lab}', '{version_lab}', '{download_lab}', '{f_temp}', '{f_temp}', '{name}', CURRENT_TIMESTAMP);")
+    
+    id = get_REPLACE_ID('Roboflow_ID', 'roboflow', 'Api_Key')
+    
+    cur.execute(f"UPDATE roboflow SET Api_Key = '{api_key_lab}' WHERE Roboflow_ID = {id};")
+    
+    st.write("All done!")
+    return id

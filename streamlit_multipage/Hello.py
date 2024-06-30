@@ -1,5 +1,9 @@
 import streamlit as st
+st.session_state.PORT_NUMBER = 3306
+
 from dep import *
+
+
 st.set_page_config(
     page_title="Hello",
     page_icon="👋",

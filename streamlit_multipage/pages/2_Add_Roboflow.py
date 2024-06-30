@@ -1,0 +1,13 @@
+from dep import *
+
+roboflow_info = st.text_area("Import RoboFlow Information Here", value="""rf = Roboflow(api_key="YGXCqFJKogQa7WbavueN")
+project = rf.workspace("oyster-pt-3").project("oyt")
+version = project.version(7)
+dataset = version.download("yolov9")""", height=120)
+
+add_roboflow(cur_name, roboflow_info, load=True)
+
+
+
+
+# st.write(roboflow_info)

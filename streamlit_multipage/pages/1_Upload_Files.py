@@ -1,7 +1,5 @@
-import streamlit as st
 from dep import *
-import io
-import PIL.Image as Image
+
 
 # if 'user' not in st.session_state:
 #     print("Lost variable")
