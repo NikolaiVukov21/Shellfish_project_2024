@@ -22,3 +22,11 @@ sql/runs
 molten-album-427115-q6-cfa4e4aaf3bd.json
 /sql/Files_local/
 Jupyter_local_code/Oyt-7/
+sql/Files/
+molten-album-427115-q6-cfa4e4aaf3bd.json
+cloud-sql-proxy
+cloud-sql-proxy.exe
+Jupyter_local_code/runs/
+molten-album-427115-q6-cfa4e4aaf3bd.json
+streamlit_multipage/Files_local/
+__pycache__
