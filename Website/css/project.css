@@ -1,0 +1,87 @@
+.project-section {
+    background-color: rgb(141, 2, 2);
+    display: flex;
+    height: 700px;
+
+    border-width: 2px;
+    border-style: solid;
+    border-radius: 20px;
+    border-color: white;
+}
+
+.project-head {
+    font-family: Roboto;
+    font-size: 40px;
+    font-weight: 800;
+    display: block;
+    
+    margin-top: 50px;
+    margin-left: 50px;
+    color: white;
+    border-width: 2px;
+    border-style: solid;
+    border-radius: 20px;
+    border-color: white;
+}
+
+.project-sub-text {
+    font-family: Roboto;
+    font-size: 24px;
+    font-weight: 300;
+    color: white;
+    margin-left: 50px;
+}
+
+.project-left-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.top-left-section {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.bottom-lft-section {
+    background-color: rgb(141, 2, 2);
+    flex: 1;
+}
+
+.pdf-button {
+    background-color: white;
+    color: black;
+    border-width: 2px;
+    border-color: rgb(141, 2, 2);
+    border-radius: 20px;
+    margin-top: 70px;
+    margin-left: 50px;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    padding-right: 70px;
+    padding-left: 70px;
+    font-size: 20px;
+    font-weight: bold;
+    transition: border 1s, border-color 1s, background-color 1s, color 1s;
+}
+
+.pdf-button:hover {
+    border-color: rgb(141, 2, 2);
+    background-color: black;
+    color: white;
+    cursor: pointer;
+}
+
+.project-right-section {
+    flex: 1;
+}
+
+.oyster-pic {
+    width: 700px;
+    height: 700px;
+    margin-top: 0px;
+    margin-left: 70px;
+    border: none;
+    border-radius: 350px;
+}
