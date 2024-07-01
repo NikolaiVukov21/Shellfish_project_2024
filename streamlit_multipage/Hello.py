@@ -5,7 +5,7 @@ from dep import *
 
 
 st.set_page_config(
-    page_title="Hello",
+    page_title="oddai",
     page_icon="👋",
 )
 

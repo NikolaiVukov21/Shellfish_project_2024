@@ -11,3 +11,5 @@ git+https://github.com/THU-MIG/yolov10.git
 huggingface_hub==0.23.3
 wget==3.2
 gcloud==0.18.3
+httplib2==0.15.0
+google-api-python-client==1.6

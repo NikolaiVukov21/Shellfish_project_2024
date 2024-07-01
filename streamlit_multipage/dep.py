@@ -28,7 +28,8 @@ bba = sv.BoxCornerAnnotator()
 la = sv.LabelAnnotator(text_scale = 0.4, text_padding = 1)
 
 db_main = 'test_4'
-cur_name = 'ab'
+# cur_name = 'ab'
+REPLACE = 'REPLACE'
 
 sql_conn = pymysql.connect(
     user="root",
@@ -152,7 +153,7 @@ def get_id_fname(f_out, fpath, id):
     return os.path.join(f_out, f"{fname[:per_index]}-{id}.{ext}").replace('\\', '/')
 
 def get_REPLACE_ID(column_id = 'Raw_File_ID', table='raw_files', column_rep='Filepath'):
-    cur.execute(f"""SELECT {column_id} from {table} where {column_rep} = 'REPLACE'""")
+    cur.execute(f"""SELECT {column_id} from {table} where {column_rep} = '{REPLACE}'""")
     id = cur.fetchall()[-1][column_id]
     return id
 
@@ -247,7 +248,7 @@ def add_photo(user, im, filename, notes = '', f_out = 'Files/Image_raw'):
     fsize = os.stat(f_temp).st_size
     ext = get_ext(f_temp)
     
-    cur.execute(f"INSERT INTO raw_files (Username, Filepath, Filename, Local_Path, Size, Type, Extension, Notes, Width, Height, Time_Uploaded) VALUES ('{user}', 'REPLACE', 'REPLACE', 'REPLACE', {fsize}, 'Image', '{ext}', '{notes}', {width}, {height}, CURRENT_TIMESTAMP);")
+    cur.execute(f"INSERT INTO raw_files (Username, Filepath, Filename, Local_Path, Size, Type, Extension, Notes, Width, Height, Time_Uploaded) VALUES ('{user}', '{REPLACE}', '{REPLACE}', '{REPLACE}', {fsize}, 'Image', '{ext}', '{notes}', {width}, {height}, CURRENT_TIMESTAMP);")
     id = get_REPLACE_ID()
 
     f_id_name_g = get_id_fname(f_out, f_temp, id)
@@ -262,20 +263,18 @@ def add_photo(user, im, filename, notes = '', f_out = 'Files/Image_raw'):
 def get_photos(user):
     cur.execute(f"SELECT Filepath, Filename, Raw_File_ID FROM raw_files WHERE Username = '{user}';")
     res = cur.fetchall()
-    if res:
-        keys = [row['Filename'] for row in res]
-        values = [row['Raw_File_ID'] for row in res]
-        return dict(zip(keys, values))
-    else:
-        return dict()
+    keys = [row['Filename'] for row in res]
+    values = [row['Raw_File_ID'] for row in res]
+    return keys, values
 
-def get_models():
-    cur.execute(f"SELECT Model_ID from models WHERE Model_Points_Path != 'REPLACE';")
+
+def get_models(name):
+    cur.execute(f"SELECT * FROM roboflow INNER JOIN models ON roboflow.Roboflow_ID = models.Roboflow_ID WHERE username = '{name}' AND models.Local_Path != '{REPLACE}';")
     res = cur.fetchall()
+    mod_names_keys = [f"{row['Model_Type']}v{row['models.Version']} {row['Width_Training_Images']}x{row['Height_Training_Images']} with {row['Workspace']} {row['Timestamp_Created']}" for row in res]
+    all_mods_values = [row['Model_ID'] for row in res]
 
-    all_mods = [row['Model_ID'] for row in res]
-
-    return all_mods
+    return mod_names_keys, all_mods_values
 
 
     # dict(zip([res['Filepath']]))
@@ -318,7 +317,7 @@ def ann_img(Raw_File_ID, Model_ID, threshold = 0.03, notes = '', f_out = 'Files/
     model = YOLOv10(cur_model['Local_Path'])
     annot, num_oysters, tot_time, end_ann_data = annotate_image(im, model, conf_level = threshold)
 
-    cur.execute(f"INSERT INTO annotated_files (Raw_File_ID, Model_ID, Annotated_Filepath, Time_to_Annotate, Confidence_Threshold, Notes, Timestamp) VALUES ('{Raw_File_ID}', '{Model_ID}', 'REPLACE', '{tot_time}', {threshold}, '{notes}', CURRENT_TIMESTAMP);")
+    cur.execute(f"INSERT INTO annotated_files (Raw_File_ID, Model_ID, Annotated_Filepath, Time_to_Annotate, Confidence_Threshold, Notes, Timestamp) VALUES ('{Raw_File_ID}', '{Model_ID}', '{REPLACE}', '{tot_time}', {threshold}, '{notes}', CURRENT_TIMESTAMP);")
     id = get_REPLACE_ID(column_id = 'Ann_File_ID', table='annotated_files', column_rep='Annotated_Filepath')
     f_id_name_g = get_id_fname(f_out, cur_photo['Filepath'], id)
     f_local = get_temp_fname(f_id_name_g)
@@ -335,13 +334,13 @@ def ann_img(Raw_File_ID, Model_ID, threshold = 0.03, notes = '', f_out = 'Files/
     cur.execute(f"UPDATE annotated_files SET Annotated_Filepath = '{f_id_name_g}', Local_Path = '{f_local}' WHERE Ann_File_ID = {id};")
     cur.execute(f"INSERT INTO annotated_photos (Ann_File_ID, Number_of_Oysters) VALUES ({id}, {num_oysters})")
 
-    coord = end_ann_data.xyxy
-    conf = end_ann_data.confidence
-    names = end_ann_data.data['class_name']
-    class_num = end_ann_data.class_id
-    for idx in range(len(coord)):
-        coord_cur = coord[idx]
-        cur.execute(f"INSERT INTO oysters_in_photo (Ann_File_ID, Confidence, X1, Y1, X2, Y2, Class, Class_Index) VALUES ({id}, {conf[idx]}, {coord_cur[0]}, {coord_cur[1]}, {coord_cur[2]}, {coord_cur[3]}, '{names[idx]}', {class_num[idx]});")
+    # coord = end_ann_data.xyxy
+    # conf = end_ann_data.confidence
+    # names = end_ann_data.data['class_name']
+    # class_num = end_ann_data.class_id
+    # for idx in range(len(coord)):
+    #     coord_cur = coord[idx]
+    #     cur.execute(f"INSERT INTO oysters_in_photo (Ann_File_ID, Confidence, X1, Y1, X2, Y2, Class, Class_Index) VALUES ({id}, {conf[idx]}, {coord_cur[0]}, {coord_cur[1]}, {coord_cur[2]}, {coord_cur[3]}, '{names[idx]}', {class_num[idx]});")
     return id
 
 # ann_img(66, 28)
@@ -401,7 +400,7 @@ def add_roboflow(name, export_string, f_out = 'Files/Roboflow', f_weights = "Fil
     
     upload_folder_g(f_temp, folder_g)
     
-    cur.execute(f"INSERT INTO roboflow (Api_Key, Workspace, Project, Version, Download, Dataset_Location, Local_Path, Username, Timestamp) VALUES ('REPLACE', '{workspace_lab}', '{project_lab}', '{version_lab}', '{download_lab}', '{f_temp}', '{f_temp}', '{name}', CURRENT_TIMESTAMP);")
+    cur.execute(f"INSERT INTO roboflow (Api_Key, Workspace, Project, Version, Download, Dataset_Location, Local_Path, Username, Timestamp) VALUES ('{REPLACE}', '{workspace_lab}', '{project_lab}', '{version_lab}', '{download_lab}', '{f_temp}', '{f_temp}', '{name}', CURRENT_TIMESTAMP);")
     
     id = get_REPLACE_ID('Roboflow_ID', 'roboflow', 'Api_Key')
     
@@ -409,3 +408,91 @@ def add_roboflow(name, export_string, f_out = 'Files/Roboflow', f_weights = "Fil
     
     st.write("All done!")
     return id
+
+def download_weight(path, ver): # one of ['n', 's', 'm', 'b', 'x', 'l']
+    with st.spinner("Getting Pre-Trained Weights File"):
+        valid_ver = ['n', 's', 'm', 'b', 'l', 'x']
+        if ver not in valid_ver:
+            assert ValueError('Invalid version selected. Must be one of: n, s, m, b, l, x,  for nano, small, medium, big, large, extra large respectively')
+        prefix = "https://github.com/THU-MIG/yolov10/releases/download/v1.1/yolov10"
+        suffix = ".pt"
+        fname = 'yolov10' + ver + suffix
+        web_path = prefix + ver + suffix
+        computer_path = os.path.join(path, fname)
+        
+        if not os.path.exists(computer_path):
+            wget.download(web_path, out = path)
+        os.remove(fname)
+        return computer_path
+
+def get_roboflow(user):
+    cur.execute(f"SELECT Roboflow_ID, Project, Workspace, Version FROM roboflow WHERE Username = '{user}'")
+    res = cur.fetchall()
+
+    return [f"{row['Workspace']}, {row['Project']} v{row['Version']} ({row['Roboflow_ID']})" for row in res], [row['Roboflow_ID'] for row in res]
+
+
+def add_model(roboflow_ID, size_mod = 'n', epochs = 10, batch = 32, f_out = "Files/Model"):
+    
+    weights_path = download_weight(temp_folder, size_mod)
+    
+    
+    cur.execute(f"SELECT * FROM roboflow WHERE Roboflow_ID = {roboflow_ID}")
+    res = cur.fetchall()[-1]
+    print(res)
+
+    download_roboflow(res['Api_Key'], res['Workspace'], res['Project'], res['Version'], res['Download'], res['Dataset_Location'])
+    
+    pt = os.path.join(os.getcwd(), res['Dataset_Location'][len('./'):], 'data.yaml')
+
+
+    
+    samp_photo = os.path.join(res['Dataset_Location'], 'test', 'images')
+    first_photo = os.listdir(samp_photo)[0]
+    im = Image.open(os.path.join(samp_photo, first_photo))
+    width = im.size[0]
+    height = im.size[1]
+                                                               
+    cur.execute(f"""INSERT INTO models (Timestamp_Created, Model_Points_Path, Local_Path, Version, 
+                 Hyperparams, Epoch, Batch, Model_Type, Width_Training_Images, Height_Training_Images, 
+                 Size, Roboflow_ID) values (CURRENT_TIMESTAMP, '{REPLACE}', '{REPLACE}', 10, NULL, {epochs}, {batch}, 
+                 'YOLO', {width}, {height}, '{size_mod}', {roboflow_ID})
+                 """)
+    
+    id_mod = get_REPLACE_ID(column_id = 'Model_ID', table='models', column_rep='Model_Points_Path')
+    pts_name = f'{id_mod}.pt'
+    model_path_g = os.path.join(f_out, pts_name)
+    # 
+    pts_save_path = os.path.join(temp_folder, pts_name)
+    temp_train_path = f"Run_{id_mod}"
+
+
+    with st.spinner('Training model...'):
+        os.system(f"yolo task=detect mode=train epochs={epochs} batch={batch} plots=False model={weights_path} data={pt} name={temp_train_path}")
+
+    orig_pts_path = os.path.join('runs', 'detect', temp_train_path, 'weights', 'best.pt')
+    upload_file_g(orig_pts_path, model_path_g)
+    os.rename(orig_pts_path, pts_save_path) # for later inference, on computer because people will likely want the model then
+    
+    cur.execute(f"UPDATE models SET Model_Points_Path = '{model_path_g}', Local_Path = '{pts_save_path}' WHERE Model_ID = {id_mod};")
+
+    # delete_folder('runs')
+    return id_mod
+
+
+
+
+# id_mod = add_model(id_rob,epochs=1, size_mod = 'n')
+
+def kv_select(kvlist, label = "", reverse = True):
+    KEYS = 0
+    VALUES = 1
+    # print(kvlist)
+    if kvlist != ([], []):
+        selected = st.selectbox(
+            label,
+            kvlist[KEYS][::-1] if reverse else kvlist[KEYS])
+        return kvlist[VALUES][kvlist[KEYS].index(selected)]
+    else:
+        st.write('No values found')
+

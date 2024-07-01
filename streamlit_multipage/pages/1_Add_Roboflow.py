@@ -5,9 +5,7 @@ project = rf.workspace("oyster-pt-3").project("oyt")
 version = project.version(7)
 dataset = version.download("yolov9")""", height=120)
 
-add_roboflow(cur_name, roboflow_info, load=True)
+add_roboflow(st.session_state.user, roboflow_info, load=True)
 
 
 
-
-# st.write(roboflow_info)
