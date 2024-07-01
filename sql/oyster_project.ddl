@@ -25,6 +25,7 @@ create table raw_files
     Height        int           not null,
     Time_Uploaded timestamp     not null,
     Local_Path    varchar(2048) not null,
+    Filename      varchar(64)   not null,
     constraint username_2
         foreign key (Username) references people (Username)
 );

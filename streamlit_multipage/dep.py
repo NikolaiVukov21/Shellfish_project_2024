@@ -20,6 +20,8 @@ from oauth2client.service_account import ServiceAccountCredentials
 import os
 import streamlit as st
 import io
+import string
+import random
 
 temp_folder = os.path.join('.', 'Files_local')
 temp_weights = os.path.join(temp_folder, 'Weights')
@@ -152,9 +154,9 @@ def get_id_fname(f_out, fpath, id):
     ext = fname[per_index + 1:].lower()
     return os.path.join(f_out, f"{fname[:per_index]}-{id}.{ext}").replace('\\', '/')
 
-def get_REPLACE_ID(column_id = 'Raw_File_ID', table='raw_files', column_rep='Filepath'):
-    cur.execute(f"""SELECT {column_id} from {table} where {column_rep} = '{REPLACE}'""")
-    id = cur.fetchall()[-1][column_id]
+def get_REPLACE_ID(table, column_rep):
+    cur.execute(f"""SELECT ID from {table} where {column_rep} = '{REPLACE}'""")
+    id = cur.fetchall()[-1]['ID']
     return id
 
 def get_match(pattern, string):
@@ -248,44 +250,49 @@ def add_photo(user, im, filename, notes = '', f_out = 'Files/Image_raw'):
     fsize = os.stat(f_temp).st_size
     ext = get_ext(f_temp)
     
-    cur.execute(f"INSERT INTO raw_files (Username, Filepath, Filename, Local_Path, Size, Type, Extension, Notes, Width, Height, Time_Uploaded) VALUES ('{user}', '{REPLACE}', '{REPLACE}', '{REPLACE}', {fsize}, 'Image', '{ext}', '{notes}', {width}, {height}, CURRENT_TIMESTAMP);")
-    id = get_REPLACE_ID()
+    cur.execute(f"INSERT INTO raw_files (Username, Filepath, Filename, Local_Path, Size, Type, Extension, Notes, Width, Height, Timestamp) VALUES ('{user}', '{REPLACE}', '{REPLACE}', '{REPLACE}', {fsize}, 'Image', '{ext}', '{notes}', {width}, {height}, CURRENT_TIMESTAMP);")
+    id = get_REPLACE_ID(table='raw_files', column_rep='Filepath')
 
     f_id_name_g = get_id_fname(f_out, f_temp, id)
     temp_fname = get_temp_fname(f_id_name_g)
     fname = get_filename(temp_fname)
     # print(temp_fname)
     upload_file_g(f_temp, f_id_name_g)
-    cur.execute(f"UPDATE raw_files SET Filepath = '{f_id_name_g}', Local_Path = '{temp_fname}', Filename = '{fname}' WHERE Raw_File_ID = {id};")
+    cur.execute(f"UPDATE raw_files SET Filepath = '{f_id_name_g}', Local_Path = '{temp_fname}', Filename = '{fname}' WHERE ID = {id};")
     # print(f"\n\n\n\n'{user}', '{f_id_name_g}', '{temp_fname}', {fsize}, 'Image', '{ext}', '{notes}', {width}, {height}")
     return id
 
-def get_photos(user):
-    cur.execute(f"SELECT Filepath, Filename, Raw_File_ID FROM raw_files WHERE Username = '{user}';")
+def get_files(user):
+    cur.execute(f"SELECT Filepath, Filename, ID FROM raw_files WHERE Username = '{user}';")
     res = cur.fetchall()
     keys = [row['Filename'] for row in res]
-    values = [row['Raw_File_ID'] for row in res]
+    values = [row['ID'] for row in res]
     return keys, values
 
 
 def get_models(name):
-    cur.execute(f"SELECT * FROM roboflow INNER JOIN models ON roboflow.Roboflow_ID = models.Roboflow_ID WHERE username = '{name}' AND models.Local_Path != '{REPLACE}';")
+    cur.execute(f"SELECT * FROM roboflow INNER JOIN models ON roboflow.ID = models.Roboflow_ID WHERE username = '{name}' AND models.Local_Path != '{REPLACE}';")
     res = cur.fetchall()
-    mod_names_keys = [f"{row['Model_Type']}v{row['models.Version']} {row['Width_Training_Images']}x{row['Height_Training_Images']} with {row['Workspace']} {row['Timestamp_Created']}" for row in res]
-    all_mods_values = [row['Model_ID'] for row in res]
+    mod_names_keys = [f"{row['Model_Type']}v{row['models.Version']} {row['Width_Training_Images']}x{row['Height_Training_Images']} with {row['Workspace']} {row['Timestamp']}" for row in res]
+    all_mods_values = [row['models.ID'] for row in res]
 
     return mod_names_keys, all_mods_values
 
 
     # dict(zip([res['Filepath']]))
 
-def annotate_image(im: Image, model, label_annotator = la, bounding_box_annotator = bba, verbose = False, conf = True, conf_level = 0.05):
+def ann_img_helper(im: Image, model, label_annotator = la, bounding_box_annotator = bba, verbose = False, conf_level = 0.05, name_labels = False):
     fix_img = im.convert('RGB')
     np_img = np.array(fix_img)
     cont_img = np.asarray(np_img, dtype=np.uint8)
     results = model(cont_img, conf=conf_level, verbose = verbose)[0]
-    conf_array = np.array(results.boxes.conf.cpu())
-    conf_ls_str  = [str(round(x * 100) ) + '%' for x in conf_array]
+    if name_labels:
+        print(results)
+        used_labels = np.array(results.boxes.conf.cpu())
+    else:
+        conf_array = np.array(results.boxes.conf.cpu())
+        used_labels = [str(round(x * 100)) + '%' for x in conf_array]
+    
     tot_time = sum([x for x in results.speed.values()])
     
     detections = sv.Detections.from_ultralytics(results)
@@ -293,32 +300,38 @@ def annotate_image(im: Image, model, label_annotator = la, bounding_box_annotato
         scene=np_img, detections=detections)
     num_oysters = detections.xyxy.shape[0]
     annotated_image = label_annotator.annotate(
-        scene=annotated_image, detections=detections, labels = conf_ls_str)
+        scene=annotated_image, detections=detections, labels = used_labels)
     return(annotated_image, num_oysters, tot_time, detections)
 
-def ann_img(Raw_File_ID, Model_ID, threshold = 0.03, notes = '', f_out = 'Files/Image_ann'):
-    cur.execute(f"SELECT * FROM raw_files WHERE Raw_File_ID = {Raw_File_ID}")
+def ann_img(Raw_File_ID, Model_ID, threshold, notes = '', f_out = 'Files/Image_ann'):
+    cur.execute(f"SELECT * from annotated_files WHERE Model_ID = {Model_ID} AND Raw_File_ID = {Raw_File_ID} AND Confidence_Threshold = {threshold}")
+    res = cur.fetchall()
+    # st.write(res)
+    if res:
+        # st.write('Here')
+        st.write('Image Already Annotated')
+        return res[-1]['ID']
+    
+    
+    cur.execute(f"SELECT * FROM raw_files WHERE ID = {Raw_File_ID}")
     cur_photo = cur.fetchall()[-1]
 
-    cur.execute(f"SELECT * FROM models WHERE Model_ID = {Model_ID}")
+    cur.execute(f"SELECT * FROM models WHERE ID = {Model_ID}")
     cur_model = cur.fetchall()[-1]
 
-    cur.execute(f"SELECT * from annotated_files WHERE Model_ID = {Model_ID} AND Raw_File_ID = {Raw_File_ID}")
-    res = cur.fetchall()
-    if res:
-        st.write('Image Already Annotated')
-        return res[-1]['Ann_File_ID']
+
     
     download_file_g(cur_photo['Filepath'], cur_photo['Local_Path'])
     im = Image.open(cur_photo['Local_Path'])
     
 
-    download_file_g(cur_model['Model_Points_Path'], cur_model['Local_Path'])
+    download_file_g(cur_model['Filepath'], cur_model['Local_Path'])
     model = YOLOv10(cur_model['Local_Path'])
-    annot, num_oysters, tot_time, end_ann_data = annotate_image(im, model, conf_level = threshold)
-
-    cur.execute(f"INSERT INTO annotated_files (Raw_File_ID, Model_ID, Annotated_Filepath, Time_to_Annotate, Confidence_Threshold, Notes, Timestamp) VALUES ('{Raw_File_ID}', '{Model_ID}', '{REPLACE}', '{tot_time}', {threshold}, '{notes}', CURRENT_TIMESTAMP);")
-    id = get_REPLACE_ID(column_id = 'Ann_File_ID', table='annotated_files', column_rep='Annotated_Filepath')
+    annot, num_oysters, tot_time, end_ann_data = ann_img_helper(im, model, conf_level = threshold / 100)
+    # st.write("This side of insert")
+    cur.execute(f"INSERT INTO annotated_files (Raw_File_ID, Model_ID, Confidence_Threshold, Filepath, Time_to_Annotate, Notes, Timestamp) VALUES ('{Raw_File_ID}', '{Model_ID}', {threshold}, '{REPLACE}', '{tot_time}', '{notes}', CURRENT_TIMESTAMP);")
+    # st.write("Other side of insert")
+    id = get_REPLACE_ID(table='annotated_files', column_rep='Filepath')
     f_id_name_g = get_id_fname(f_out, cur_photo['Filepath'], id)
     f_local = get_temp_fname(f_id_name_g)
     print(f_local)
@@ -331,7 +344,7 @@ def ann_img(Raw_File_ID, Model_ID, threshold = 0.03, notes = '', f_out = 'Files/
     upload_file_g(f_local, f_id_name_g)
 
 
-    cur.execute(f"UPDATE annotated_files SET Annotated_Filepath = '{f_id_name_g}', Local_Path = '{f_local}' WHERE Ann_File_ID = {id};")
+    cur.execute(f"UPDATE annotated_files SET Filepath = '{f_id_name_g}', Local_Path = '{f_local}' WHERE ID = {id};")
     cur.execute(f"INSERT INTO annotated_photos (Ann_File_ID, Number_of_Oysters) VALUES ({id}, {num_oysters})")
 
     # coord = end_ann_data.xyxy
@@ -346,9 +359,9 @@ def ann_img(Raw_File_ID, Model_ID, threshold = 0.03, notes = '', f_out = 'Files/
 # ann_img(66, 28)
 
 def get_fpath_ann(ann_id):
-    cur.execute(f"SELECT Local_Path, Annotated_Filepath from annotated_files WHERE Ann_File_ID = {ann_id}")
+    cur.execute(f"SELECT Local_Path, Filepath from annotated_files WHERE ID = {ann_id}")
     res = cur.fetchall()[-1]
-    download_file_g(res['Annotated_Filepath'], res['Local_Path'])
+    download_file_g(res['Filepath'], res['Local_Path'])
     return res['Local_Path']
 # ann_photo_id = ann_img(id_raw_photo, id_mod)
 
@@ -400,11 +413,11 @@ def add_roboflow(name, export_string, f_out = 'Files/Roboflow', f_weights = "Fil
     
     upload_folder_g(f_temp, folder_g)
     
-    cur.execute(f"INSERT INTO roboflow (Api_Key, Workspace, Project, Version, Download, Dataset_Location, Local_Path, Username, Timestamp) VALUES ('{REPLACE}', '{workspace_lab}', '{project_lab}', '{version_lab}', '{download_lab}', '{f_temp}', '{f_temp}', '{name}', CURRENT_TIMESTAMP);")
+    cur.execute(f"INSERT INTO roboflow (Api_Key, Workspace, Project, Version, Download, Local_Path, Username, Timestamp) VALUES ('{REPLACE}', '{workspace_lab}', '{project_lab}', '{version_lab}', '{download_lab}', '{f_temp}', '{name}', CURRENT_TIMESTAMP);")
     
-    id = get_REPLACE_ID('Roboflow_ID', 'roboflow', 'Api_Key')
+    id = get_REPLACE_ID(table='roboflow', column_rep='Api_Key')
     
-    cur.execute(f"UPDATE roboflow SET Api_Key = '{api_key_lab}' WHERE Roboflow_ID = {id};")
+    cur.execute(f"UPDATE roboflow SET Api_Key = '{api_key_lab}' WHERE ID = {id};")
     
     st.write("All done!")
     return id
@@ -422,14 +435,14 @@ def download_weight(path, ver): # one of ['n', 's', 'm', 'b', 'x', 'l']
         
         if not os.path.exists(computer_path):
             wget.download(web_path, out = path)
-        os.remove(fname)
+        # os.remove(fname)
         return computer_path
 
 def get_roboflow(user):
-    cur.execute(f"SELECT Roboflow_ID, Project, Workspace, Version FROM roboflow WHERE Username = '{user}'")
+    cur.execute(f"SELECT ID, Project, Workspace, Version FROM roboflow WHERE Username = '{user}'")
     res = cur.fetchall()
 
-    return [f"{row['Workspace']}, {row['Project']} v{row['Version']} ({row['Roboflow_ID']})" for row in res], [row['Roboflow_ID'] for row in res]
+    return [f"{row['Workspace']}, {row['Project']} v{row['Version']} ({row['ID']})" for row in res], [row['ID'] for row in res]
 
 
 def add_model(roboflow_ID, size_mod = 'n', epochs = 10, batch = 32, f_out = "Files/Model"):
@@ -437,29 +450,29 @@ def add_model(roboflow_ID, size_mod = 'n', epochs = 10, batch = 32, f_out = "Fil
     weights_path = download_weight(temp_folder, size_mod)
     
     
-    cur.execute(f"SELECT * FROM roboflow WHERE Roboflow_ID = {roboflow_ID}")
+    cur.execute(f"SELECT * FROM roboflow WHERE ID = {roboflow_ID}")
     res = cur.fetchall()[-1]
     print(res)
 
-    download_roboflow(res['Api_Key'], res['Workspace'], res['Project'], res['Version'], res['Download'], res['Dataset_Location'])
+    download_roboflow(res['Api_Key'], res['Workspace'], res['Project'], res['Version'], res['Download'], res['Local_Path'])
     
-    pt = os.path.join(os.getcwd(), res['Dataset_Location'][len('./'):], 'data.yaml')
+    pt = os.path.join(os.getcwd(), res['Local_Path'][len('./'):], 'data.yaml')
 
 
     
-    samp_photo = os.path.join(res['Dataset_Location'], 'test', 'images')
+    samp_photo = os.path.join(res['Local_Path'], 'test', 'images')
     first_photo = os.listdir(samp_photo)[0]
     im = Image.open(os.path.join(samp_photo, first_photo))
     width = im.size[0]
     height = im.size[1]
                                                                
-    cur.execute(f"""INSERT INTO models (Timestamp_Created, Model_Points_Path, Local_Path, Version, 
+    cur.execute(f"""INSERT INTO models (Timestamp, Filepath, Local_Path, Version, 
                  Hyperparams, Epoch, Batch, Model_Type, Width_Training_Images, Height_Training_Images, 
                  Size, Roboflow_ID) values (CURRENT_TIMESTAMP, '{REPLACE}', '{REPLACE}', 10, NULL, {epochs}, {batch}, 
                  'YOLO', {width}, {height}, '{size_mod}', {roboflow_ID})
                  """)
     
-    id_mod = get_REPLACE_ID(column_id = 'Model_ID', table='models', column_rep='Model_Points_Path')
+    id_mod = get_REPLACE_ID(table='models', column_rep='Filepath')
     pts_name = f'{id_mod}.pt'
     model_path_g = os.path.join(f_out, pts_name)
     # 
@@ -474,7 +487,7 @@ def add_model(roboflow_ID, size_mod = 'n', epochs = 10, batch = 32, f_out = "Fil
     upload_file_g(orig_pts_path, model_path_g)
     os.rename(orig_pts_path, pts_save_path) # for later inference, on computer because people will likely want the model then
     
-    cur.execute(f"UPDATE models SET Model_Points_Path = '{model_path_g}', Local_Path = '{pts_save_path}' WHERE Model_ID = {id_mod};")
+    cur.execute(f"UPDATE models SET Filepath = '{model_path_g}', Local_Path = '{pts_save_path}' WHERE ID = {id_mod};")
 
     # delete_folder('runs')
     return id_mod
@@ -484,7 +497,7 @@ def add_model(roboflow_ID, size_mod = 'n', epochs = 10, batch = 32, f_out = "Fil
 
 # id_mod = add_model(id_rob,epochs=1, size_mod = 'n')
 
-def kv_select(kvlist, label = "", reverse = True):
+def kv_select(kvlist, label = "", reverse = False):
     KEYS = 0
     VALUES = 1
     # print(kvlist)
@@ -496,3 +509,127 @@ def kv_select(kvlist, label = "", reverse = True):
     else:
         st.write('No values found')
 
+def generate_random_string(length):
+
+  letters = string.ascii_letters + string.digits
+  result_str = ''.join(random.choice(letters) for i in range(length))
+  return result_str
+
+def add_video(name, fpath, fname, notes = '', f_out = 'Files/Video_raw'):
+    '''
+    Returns: Index of added video if successful, 0 if not
+    '''
+    cap = cv2.VideoCapture(fpath)
+    width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    fsize = os.stat(fpath).st_size
+    ext = get_ext(fpath)
+        
+    cur.execute(f"INSERT INTO raw_files (Username, Filepath, Filename, Local_Path, Size, Type, Extension, Notes, Width, Height, Timestamp) VALUES ('{name}', 'REPLACE', 'REPLACE', 'REPLACE', {fsize}, 'Video', '{ext}', '{notes}', {width}, {height}, CURRENT_TIMESTAMP);")
+    id = get_REPLACE_ID(table='raw_files', column_rep='Filepath')
+    f_id_name_g = get_id_fname(f_out, fname, id)
+    # print(f_id_name_g)
+    temp_path = get_temp_fname(f_id_name_g)
+    # print(temp_path)
+    upload_file_g(fpath, f_id_name_g)
+    
+    os.rename(fpath, temp_path)
+
+    fname = get_filename(temp_path)
+    cur.execute(f"UPDATE raw_files SET Filepath = '{f_id_name_g}', Local_Path = '{temp_path}', Filename = '{fname}' WHERE ID = {id};")
+
+    fps = cap.get(cv2.CAP_PROP_FPS)
+    color_order = 'RGB' # FIXME - cant figure out how to extract from cv2 object
+    
+    
+
+    cur.execute(f"INSERT INTO videos (Raw_File_ID, FPS, Color_Order) VALUES ('{id}', '{fps}', '{color_order}');")
+
+    return id
+
+# SOME_VIDEO_PATH = "/mnt/linuxlab/home/mstaus1/Desktop/Shellfish_project_2024/Jupyter_local_code/GOPR1077_tr.mp4"
+# id_raw_video = add_video(cur_name, SOME_VIDEO_PATH, notes='')
+
+def get_type_file(ID):
+    st.write(ID)
+    cur.execute(f"SELECT Type FROM raw_files WHERE ID = {ID}")
+    res = cur.fetchall()[-1]
+    return res['Type']
+
+def ann_video_helper(input_vid, model, conf_level, out_location = '.', im_width = 416, im_height = 416):
+    tot_oysters = 0
+    tot_frame = 0
+    
+    bba = sv.BoundingBoxAnnotator()
+    la = sv.LabelAnnotator()
+
+    container = av.open(input_vid)
+    stream_vid = container.streams.video[0]
+    fname = input_vid.rsplit('/', 1)[-1]
+    per_index = fname.index('.')
+    out_path = os.path.join(out_location, f'{fname[:per_index]}_annotated.mp4')
+    outp = av.open(out_path, 'w')
+    codec_name = stream_vid.codec_context.name
+    fps = stream_vid.codec_context.rate
+    output_stream = outp.add_stream(codec_name, str(fps))
+    output_stream.width = im_width
+    output_stream.height = im_height
+    output_stream.pix_fmt = stream_vid.codec_context.pix_fmt
+    start = time()
+    for index, frame in enumerate(container.decode(stream_vid)):
+        pil_img = frame.to_image()
+        np_img = np.array(pil_img)
+        np_img_resize = cv2.resize(np_img, (im_width, im_height))
+        np_rot = np_img_resize[:, :, ::-1]
+        small_pil_img = Image.fromarray(np_rot)
+        # np_image_2 = np.array(small_pil_img)
+        an_mg, num_oysters, _, _2z = ann_img_helper(small_pil_img, model, conf_level = conf_level)
+        tot_oysters += num_oysters
+        frame_out = av.VideoFrame.from_ndarray(an_mg, format='bgr24')
+        pkt = output_stream.encode(frame_out)
+        outp.mux(pkt)
+    end = time()
+    net_time = end - start
+    container.close()
+    outp.close()
+    ann_rate = (index / fps) / net_time # ratio of time to annotate versus length of video
+    return tot_oysters / index, net_time, out_path, ann_rate
+
+def ann_video(Raw_File_ID, Model_ID, notes = '', f_out = 'Files/Video_ann', threshold = 30):
+    cur.execute(f"SELECT * from annotated_files WHERE Model_ID = {Model_ID} AND Raw_File_ID = {Raw_File_ID} AND Confidence_Threshold = {threshold}")
+    res = cur.fetchall()
+    if res:
+        st.write('Video already annotated')
+        return res[-1]['Ann_File_ID']
+    
+    cur.execute(f"SELECT * FROM raw_files WHERE ID = {Raw_File_ID}")
+    cur_video = cur.fetchall()[-1]
+
+    cur.execute(f"SELECT * FROM models WHERE ID = {Model_ID}")
+    cur_model = cur.fetchall()[-1]
+
+    download_file_g(cur_model['Filepath'], cur_model['Local_Path'])
+    
+    model = YOLOv10(cur_model['Local_Path'])
+
+    download_file_g(cur_video['Filepath'], cur_video['Local_Path'])
+    
+    avg_oysters, time_s, out_path, ann_rate = ann_video_helper(cur_video['Local_Path'], model, out_location = temp_folder, conf_level = threshold / 100)
+
+    cur.execute(f"INSERT INTO annotated_files (Raw_File_ID, Model_ID, Filepath, Time_to_Annotate, Notes, Confidence_Threshold, Timestamp, Local_Path) VALUES ('{Raw_File_ID}', '{Model_ID}', '{REPLACE}', '{time_s * 1000}', '{notes}', {threshold}, CURRENT_TIMESTAMP, '{REPLACE}');")
+
+    id = get_REPLACE_ID(table='annotated_files', column_rep='Filepath')
+
+    f_id_name_g = get_id_fname(f_out, cur_video['Filepath'], id)
+    
+    f_local = get_temp_fname(f_id_name_g)
+    
+    os.rename(out_path, f_local)
+
+    cur.execute(f"UPDATE annotated_files SET Filepath = '{f_id_name_g}', Local_Path = '{f_local}' WHERE ID = {id};")
+
+    cur.execute(f"INSERT INTO annotated_videos (Ann_File_ID, Annotation_Rate, Tracing, Average_Number_of_Oysters) VALUES ({id}, {ann_rate}, 0, {avg_oysters})")
+
+    upload_file_g(f_local, f_id_name_g)
+    
+    return id
