@@ -278,10 +278,7 @@ def get_models(name):
 
     return mod_names_keys, all_mods_values
 
-
-    # dict(zip([res['Filepath']]))
-
-def ann_img_helper(im: Image, model, label_annotator = la, bounding_box_annotator = bba, verbose = False, conf_level = 0.05, name_labels = False):
+def ann_img_helper(im: Image, model, label_annotator = la, bounding_box_annotator = bba, verbose = False, conf_level = 0.05, name_labels = False) -> np.ndarray:
     fix_img = im.convert('RGB')
     np_img = np.array(fix_img)
     cont_img = np.asarray(np_img, dtype=np.uint8)
@@ -303,36 +300,45 @@ def ann_img_helper(im: Image, model, label_annotator = la, bounding_box_annotato
         scene=annotated_image, detections=detections, labels = used_labels)
     return(annotated_image, num_oysters, tot_time, detections)
 
+def get_model(id: int):
+    cur.execute(f"SELECT Filepath, Local_Path FROM models WHERE ID = {id}")
+    cur_model = cur.fetchall()[-1]
+    download_file_g(cur_model['Filepath'], cur_model['Local_Path'])
+    try:
+        model = YOLOv10(cur_model['Local_Path'])
+        return model
+    except RuntimeError:
+        get_model(id)
+        st.write('Getting model failed')
+
+def get_raw_fpath(id: int) -> str:
+    cur.execute(f"SELECT Filepath, Local_Path FROM raw_files WHERE ID = {id}")
+    cur_file = cur.fetchall()[-1]
+    download_file_g(cur_file['Filepath'], cur_file['Local_Path'])
+    return cur_file['Filepath']
+
+
+def get_raw_image(id: int) -> Image:
+    im = Image.open(get_raw_fpath(id))
+    return im
+
+
+
 def ann_img(Raw_File_ID, Model_ID, threshold, notes = '', f_out = 'Files/Image_ann'):
     cur.execute(f"SELECT * from annotated_files WHERE Model_ID = {Model_ID} AND Raw_File_ID = {Raw_File_ID} AND Confidence_Threshold = {threshold}")
     res = cur.fetchall()
-    # st.write(res)
     if res:
-        # st.write('Here')
         st.write('Image Already Annotated')
         return res[-1]['ID']
     
-    
-    cur.execute(f"SELECT * FROM raw_files WHERE ID = {Raw_File_ID}")
-    cur_photo = cur.fetchall()[-1]
+    model = get_model(Model_ID)
+    im = get_raw_image(Raw_File_ID)
+    raw_filepath = get_raw_fpath(Raw_File_ID)
 
-    cur.execute(f"SELECT * FROM models WHERE ID = {Model_ID}")
-    cur_model = cur.fetchall()[-1]
-
-
-    
-    download_file_g(cur_photo['Filepath'], cur_photo['Local_Path'])
-    im = Image.open(cur_photo['Local_Path'])
-    
-
-    download_file_g(cur_model['Filepath'], cur_model['Local_Path'])
-    model = YOLOv10(cur_model['Local_Path'])
     annot, num_oysters, tot_time, end_ann_data = ann_img_helper(im, model, conf_level = threshold / 100)
-    # st.write("This side of insert")
     cur.execute(f"INSERT INTO annotated_files (Raw_File_ID, Model_ID, Confidence_Threshold, Filepath, Time_to_Annotate, Notes, Timestamp) VALUES ('{Raw_File_ID}', '{Model_ID}', {threshold}, '{REPLACE}', '{tot_time}', '{notes}', CURRENT_TIMESTAMP);")
-    # st.write("Other side of insert")
     id = get_REPLACE_ID(table='annotated_files', column_rep='Filepath')
-    f_id_name_g = get_id_fname(f_out, cur_photo['Filepath'], id)
+    f_id_name_g = get_id_fname(f_out, raw_filepath, id)
     f_local = get_temp_fname(f_id_name_g)
     print(f_local)
 
@@ -345,7 +351,7 @@ def ann_img(Raw_File_ID, Model_ID, threshold, notes = '', f_out = 'Files/Image_a
 
 
     cur.execute(f"UPDATE annotated_files SET Filepath = '{f_id_name_g}', Local_Path = '{f_local}' WHERE ID = {id};")
-    cur.execute(f"INSERT INTO annotated_photos (Ann_File_ID, Number_of_Oysters) VALUES ({id}, {num_oysters})")
+    cur.execute(f"INSERT INTO annotated_photos (ID, Number_of_Oysters) VALUES ({id}, {num_oysters})")
 
     # coord = end_ann_data.xyxy
     # conf = end_ann_data.confidence
@@ -357,6 +363,73 @@ def ann_img(Raw_File_ID, Model_ID, threshold, notes = '', f_out = 'Files/Image_a
     return id
 
 # ann_img(66, 28)
+
+def ann_video(Raw_File_ID, Model_ID, notes = '', f_out = 'Files/Video_ann', threshold = 30):
+    cur.execute(f"SELECT * from annotated_files WHERE Model_ID = {Model_ID} AND Raw_File_ID = {Raw_File_ID} AND Confidence_Threshold = {threshold}")
+    res = cur.fetchall()
+    if res:
+        st.write('Video already annotated')
+        return res[-1]['ID']
+    
+
+    model = get_model(Model_ID)
+
+    raw_filepath = get_raw_fpath(Raw_File_ID)
+
+    avg_oysters, time_s, out_path, ann_rate = ann_video_helper(raw_filepath, model, out_location = temp_folder, conf_level = threshold / 100)
+
+    cur.execute(f"INSERT INTO annotated_files (Raw_File_ID, Model_ID, Filepath, Time_to_Annotate, Notes, Confidence_Threshold, Timestamp, Local_Path) VALUES ('{Raw_File_ID}', '{Model_ID}', '{REPLACE}', '{time_s * 1000}', '{notes}', {threshold}, CURRENT_TIMESTAMP, '{REPLACE}');")
+
+    id = get_REPLACE_ID(table='annotated_files', column_rep='Filepath')
+
+    f_id_name_g = get_id_fname(f_out, raw_filepath, id)
+    
+    f_local = get_temp_fname(f_id_name_g)
+    
+    os.rename(out_path, f_local)
+
+    cur.execute(f"UPDATE annotated_files SET Filepath = '{f_id_name_g}', Local_Path = '{f_local}' WHERE ID = {id};")
+
+    cur.execute(f"INSERT INTO annotated_videos (ID, Annotation_Rate, Tracing, Average_Number_of_Oysters) VALUES ({id}, {ann_rate}, 0, {avg_oysters})")
+
+    upload_file_g(f_local, f_id_name_g)
+    
+    return id
+
+
+def add_video(name, fpath, fname, notes = '', f_out = 'Files/Video_raw'):
+    '''
+    Returns: Index of added video if successful, 0 if not
+    '''
+    cap = cv2.VideoCapture(fpath)
+    width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    fsize = os.stat(fpath).st_size
+    ext = get_ext(fpath)
+        
+    cur.execute(f"INSERT INTO raw_files (Username, Filepath, Filename, Local_Path, Size, Type, Extension, Notes, Width, Height, Timestamp) VALUES ('{name}', '{REPLACE}', '{REPLACE}', '{REPLACE}', {fsize}, 'Video', '{ext}', '{notes}', {width}, {height}, CURRENT_TIMESTAMP);")
+    id = get_REPLACE_ID(table='raw_files', column_rep='Filepath')
+    f_id_name_g = get_id_fname(f_out, fname, id)
+    # print(f_id_name_g)
+    temp_path = get_temp_fname(f_id_name_g)
+    # print(temp_path)
+    upload_file_g(fpath, f_id_name_g)
+    
+    os.rename(fpath, temp_path)
+
+    fname = get_filename(temp_path)
+    cur.execute(f"UPDATE raw_files SET Filepath = '{f_id_name_g}', Local_Path = '{temp_path}', Filename = '{fname}' WHERE ID = {id};")
+
+    fps = cap.get(cv2.CAP_PROP_FPS)
+    color_order = 'RGB' # FIXME - cant figure out how to extract from cv2 object
+    
+    
+
+    cur.execute(f"INSERT INTO videos (Raw_File_ID, FPS, Color_Order) VALUES ('{id}', '{fps}', '{color_order}');")
+
+    return id
+
+
 
 def get_fpath_ann(ann_id):
     cur.execute(f"SELECT Local_Path, Filepath from annotated_files WHERE ID = {ann_id}")
@@ -515,37 +588,7 @@ def generate_random_string(length):
   result_str = ''.join(random.choice(letters) for i in range(length))
   return result_str
 
-def add_video(name, fpath, fname, notes = '', f_out = 'Files/Video_raw'):
-    '''
-    Returns: Index of added video if successful, 0 if not
-    '''
-    cap = cv2.VideoCapture(fpath)
-    width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-    fsize = os.stat(fpath).st_size
-    ext = get_ext(fpath)
-        
-    cur.execute(f"INSERT INTO raw_files (Username, Filepath, Filename, Local_Path, Size, Type, Extension, Notes, Width, Height, Timestamp) VALUES ('{name}', 'REPLACE', 'REPLACE', 'REPLACE', {fsize}, 'Video', '{ext}', '{notes}', {width}, {height}, CURRENT_TIMESTAMP);")
-    id = get_REPLACE_ID(table='raw_files', column_rep='Filepath')
-    f_id_name_g = get_id_fname(f_out, fname, id)
-    # print(f_id_name_g)
-    temp_path = get_temp_fname(f_id_name_g)
-    # print(temp_path)
-    upload_file_g(fpath, f_id_name_g)
-    
-    os.rename(fpath, temp_path)
 
-    fname = get_filename(temp_path)
-    cur.execute(f"UPDATE raw_files SET Filepath = '{f_id_name_g}', Local_Path = '{temp_path}', Filename = '{fname}' WHERE ID = {id};")
-
-    fps = cap.get(cv2.CAP_PROP_FPS)
-    color_order = 'RGB' # FIXME - cant figure out how to extract from cv2 object
-    
-    
-
-    cur.execute(f"INSERT INTO videos (Raw_File_ID, FPS, Color_Order) VALUES ('{id}', '{fps}', '{color_order}');")
-
-    return id
 
 # SOME_VIDEO_PATH = "/mnt/linuxlab/home/mstaus1/Desktop/Shellfish_project_2024/Jupyter_local_code/GOPR1077_tr.mp4"
 # id_raw_video = add_video(cur_name, SOME_VIDEO_PATH, notes='')
@@ -595,41 +638,3 @@ def ann_video_helper(input_vid, model, conf_level, out_location = '.', im_width 
     ann_rate = (index / fps) / net_time # ratio of time to annotate versus length of video
     return tot_oysters / index, net_time, out_path, ann_rate
 
-def ann_video(Raw_File_ID, Model_ID, notes = '', f_out = 'Files/Video_ann', threshold = 30):
-    cur.execute(f"SELECT * from annotated_files WHERE Model_ID = {Model_ID} AND Raw_File_ID = {Raw_File_ID} AND Confidence_Threshold = {threshold}")
-    res = cur.fetchall()
-    if res:
-        st.write('Video already annotated')
-        return res[-1]['Ann_File_ID']
-    
-    cur.execute(f"SELECT * FROM raw_files WHERE ID = {Raw_File_ID}")
-    cur_video = cur.fetchall()[-1]
-
-    cur.execute(f"SELECT * FROM models WHERE ID = {Model_ID}")
-    cur_model = cur.fetchall()[-1]
-
-    download_file_g(cur_model['Filepath'], cur_model['Local_Path'])
-    
-    model = YOLOv10(cur_model['Local_Path'])
-
-    download_file_g(cur_video['Filepath'], cur_video['Local_Path'])
-    
-    avg_oysters, time_s, out_path, ann_rate = ann_video_helper(cur_video['Local_Path'], model, out_location = temp_folder, conf_level = threshold / 100)
-
-    cur.execute(f"INSERT INTO annotated_files (Raw_File_ID, Model_ID, Filepath, Time_to_Annotate, Notes, Confidence_Threshold, Timestamp, Local_Path) VALUES ('{Raw_File_ID}', '{Model_ID}', '{REPLACE}', '{time_s * 1000}', '{notes}', {threshold}, CURRENT_TIMESTAMP, '{REPLACE}');")
-
-    id = get_REPLACE_ID(table='annotated_files', column_rep='Filepath')
-
-    f_id_name_g = get_id_fname(f_out, cur_video['Filepath'], id)
-    
-    f_local = get_temp_fname(f_id_name_g)
-    
-    os.rename(out_path, f_local)
-
-    cur.execute(f"UPDATE annotated_files SET Filepath = '{f_id_name_g}', Local_Path = '{f_local}' WHERE ID = {id};")
-
-    cur.execute(f"INSERT INTO annotated_videos (Ann_File_ID, Annotation_Rate, Tracing, Average_Number_of_Oysters) VALUES ({id}, {ann_rate}, 0, {avg_oysters})")
-
-    upload_file_g(f_local, f_id_name_g)
-    
-    return id

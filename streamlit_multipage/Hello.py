@@ -1,11 +1,11 @@
 import streamlit as st
-st.session_state.PORT_NUMBER = 3306
+st.session_state.PORT_NUMBER = 3310
 
 from dep import *
 
 
 st.set_page_config(
-    page_title="oddai",
+    page_title="OddAI",
     page_icon="👋",
 )
 
@@ -25,7 +25,7 @@ if pwd != '':
     success = add_user(user, pwd, new_user)
     if success:
         st.session_state.user = success
-        print(success)
-        print("user:", st.session_state.user)
+        # print(success)
+        # print("user:", st.session_state.user)
     
     # print("Username added")
