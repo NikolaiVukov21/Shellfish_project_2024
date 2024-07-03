@@ -1,5 +1,5 @@
 import streamlit as st
-st.session_state.PORT_NUMBER = 3310
+st.session_state.PORT_NUMBER = 3306
 
 from dep import *
 
@@ -20,12 +20,8 @@ user = st.text_input("Username", "")
 pwd = st.text_input("Password", "")
 # print(username)
 # print(st.session_state.Username + "Current username")
-# st.session_state.user = "Guest"
+st.session_state.user = "Guest"
 if pwd != '':
     success = add_user(user, pwd, new_user)
     if success:
         st.session_state.user = success
-        # print(success)
-        # print("user:", st.session_state.user)
-    
-    # print("Username added")

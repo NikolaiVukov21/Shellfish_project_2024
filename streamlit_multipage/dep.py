@@ -162,7 +162,6 @@ def get_REPLACE_ID(table, column_rep):
 def get_match(pattern, string):
     matches = re.search(pattern, string)
     if matches:
-        # print(matches.group(1))
         return(matches.group(1))
     else:
         raise ValueError(f'Improper string exported, couldn\'t find {pattern} in the given text')
@@ -225,7 +224,6 @@ def add_user(name, password, new_user):
     else:
         cur.execute(f"SELECT Username, Password FROM people WHERE Username = '{name}'")
         res = cur.fetchall()
-        # print(res)
         if not res:
             st.write(f"User is not in database. Please make a new account.")
             return False
@@ -256,10 +254,8 @@ def add_photo(user, im, filename, notes = '', f_out = 'Files/Image_raw'):
     f_id_name_g = get_id_fname(f_out, f_temp, id)
     temp_fname = get_temp_fname(f_id_name_g)
     fname = get_filename(temp_fname)
-    # print(temp_fname)
     upload_file_g(f_temp, f_id_name_g)
     cur.execute(f"UPDATE raw_files SET Filepath = '{f_id_name_g}', Local_Path = '{temp_fname}', Filename = '{fname}' WHERE ID = {id};")
-    # print(f"\n\n\n\n'{user}', '{f_id_name_g}', '{temp_fname}', {fsize}, 'Image', '{ext}', '{notes}', {width}, {height}")
     return id
 
 def get_files(user):
@@ -284,7 +280,6 @@ def ann_img_helper(im: Image, model, label_annotator = la, bounding_box_annotato
     cont_img = np.asarray(np_img, dtype=np.uint8)
     results = model(cont_img, conf=conf_level, verbose = verbose)[0]
     if name_labels:
-        print(results)
         used_labels = np.array(results.boxes.conf.cpu())
     else:
         conf_array = np.array(results.boxes.conf.cpu())
@@ -315,7 +310,7 @@ def get_raw_fpath(id: int) -> str:
     cur.execute(f"SELECT Filepath, Local_Path FROM raw_files WHERE ID = {id}")
     cur_file = cur.fetchall()[-1]
     download_file_g(cur_file['Filepath'], cur_file['Local_Path'])
-    return cur_file['Filepath']
+    return cur_file['Local_Path']
 
 
 def get_raw_image(id: int) -> Image:
@@ -335,12 +330,11 @@ def ann_img(Raw_File_ID, Model_ID, threshold, notes = '', f_out = 'Files/Image_a
     im = get_raw_image(Raw_File_ID)
     raw_filepath = get_raw_fpath(Raw_File_ID)
 
-    annot, num_oysters, tot_time, end_ann_data = ann_img_helper(im, model, conf_level = threshold / 100)
+    annot, num_oysters, tot_time, _ = ann_img_helper(im, model, conf_level = threshold / 100)
     cur.execute(f"INSERT INTO annotated_files (Raw_File_ID, Model_ID, Confidence_Threshold, Filepath, Time_to_Annotate, Notes, Timestamp) VALUES ('{Raw_File_ID}', '{Model_ID}', {threshold}, '{REPLACE}', '{tot_time}', '{notes}', CURRENT_TIMESTAMP);")
     id = get_REPLACE_ID(table='annotated_files', column_rep='Filepath')
     f_id_name_g = get_id_fname(f_out, raw_filepath, id)
     f_local = get_temp_fname(f_id_name_g)
-    print(f_local)
 
     im_f = Image.fromarray(annot)
     im_f.save(f_local)
@@ -351,7 +345,7 @@ def ann_img(Raw_File_ID, Model_ID, threshold, notes = '', f_out = 'Files/Image_a
 
 
     cur.execute(f"UPDATE annotated_files SET Filepath = '{f_id_name_g}', Local_Path = '{f_local}' WHERE ID = {id};")
-    cur.execute(f"INSERT INTO annotated_photos (ID, Number_of_Oysters) VALUES ({id}, {num_oysters})")
+    cur.execute(f"INSERT INTO annotated_photos (Ann_File_ID, Number_of_Oysters) VALUES ({id}, {num_oysters})")
 
     # coord = end_ann_data.xyxy
     # conf = end_ann_data.confidence
@@ -410,9 +404,7 @@ def add_video(name, fpath, fname, notes = '', f_out = 'Files/Video_raw'):
     cur.execute(f"INSERT INTO raw_files (Username, Filepath, Filename, Local_Path, Size, Type, Extension, Notes, Width, Height, Timestamp) VALUES ('{name}', '{REPLACE}', '{REPLACE}', '{REPLACE}', {fsize}, 'Video', '{ext}', '{notes}', {width}, {height}, CURRENT_TIMESTAMP);")
     id = get_REPLACE_ID(table='raw_files', column_rep='Filepath')
     f_id_name_g = get_id_fname(f_out, fname, id)
-    # print(f_id_name_g)
     temp_path = get_temp_fname(f_id_name_g)
-    # print(temp_path)
     upload_file_g(fpath, f_id_name_g)
     
     os.rename(fpath, temp_path)
@@ -474,13 +466,10 @@ def add_roboflow(name, export_string, f_out = 'Files/Roboflow', f_weights = "Fil
     pattern_download = r'\bdownload\("([^"]+)"\)'
     download_lab = get_match(pattern_download, export_string)
     
-#     f_temp = get_temp_fname(f_out)
     folder_name = f'{workspace_lab}_{project_lab}_{version_lab}_{download_lab}'
     f_temp = os.path.join(temp_folder, folder_name)
     
     folder_g = os.path.join(f_out, folder_name)
-#     folder_roboflow = f"{f_out}/{workspace_lab}_{project_lab}_{version_lab}_{download_lab}"
-    # print(api_key_lab, workspace_lab, project_lab, version_lab, download_lab, f_temp)
     if load:
         download_roboflow(api_key_lab, workspace_lab, project_lab, version_lab, download_lab, f_temp)
     
@@ -525,7 +514,6 @@ def add_model(roboflow_ID, size_mod = 'n', epochs = 10, batch = 32, f_out = "Fil
     
     cur.execute(f"SELECT * FROM roboflow WHERE ID = {roboflow_ID}")
     res = cur.fetchall()[-1]
-    print(res)
 
     download_roboflow(res['Api_Key'], res['Workspace'], res['Project'], res['Version'], res['Download'], res['Local_Path'])
     
@@ -573,7 +561,6 @@ def add_model(roboflow_ID, size_mod = 'n', epochs = 10, batch = 32, f_out = "Fil
 def kv_select(kvlist, label = "", reverse = False):
     KEYS = 0
     VALUES = 1
-    # print(kvlist)
     if kvlist != ([], []):
         selected = st.selectbox(
             label,
