@@ -327,7 +327,6 @@ def add_photo(user, im, filename, notes = '', f_out = 'Files/Image_raw'):
     f_id_name_g = get_id_fname(f_out, f_temp, id)
     temp_fname = get_temp_fname(f_id_name_g)
     fname = get_filename(temp_fname)
-    # print(temp_fname)
     upload_file_g(f_temp, f_id_name_g)
     run_sql(f"UPDATE raw_files SET Filepath = '{f_id_name_g}', Local_Path = '{temp_fname}', Filename = '{fname}' WHERE ID = {id};")
     # print(f"\n\n\n\n'{user}', '{f_id_name_g}', '{temp_fname}', {fsize}, 'Image', '{ext}', '{notes}', {width}, {height}")
@@ -354,7 +353,6 @@ def ann_img_helper(im: Image, model, label_annotator = la, bounding_box_annotato
     cont_img = np.asarray(np_img, dtype=np.uint8)
     results = model(cont_img, conf=conf_level, verbose = verbose)[0]
     if name_labels:
-        print(results)
         used_labels = np.array(results.boxes.conf.cpu())
     else:
         conf_array = np.array(results.boxes.conf.cpu())
@@ -369,6 +367,45 @@ def ann_img_helper(im: Image, model, label_annotator = la, bounding_box_annotato
     annotated_image = label_annotator.annotate(
         scene=annotated_image, detections=detections, labels = used_labels)
     return(annotated_image, num_oysters, tot_time, detections)
+
+def ann_video_helper(input_vid, model, conf_level, out_location = '.', im_width = 416, im_height = 416):
+    tot_oysters = 0
+    tot_frame = 0
+    
+    bba = sv.BoundingBoxAnnotator()
+    la = sv.LabelAnnotator()
+
+    container = av.open(input_vid)
+    stream_vid = container.streams.video[0]
+    fname = input_vid.rsplit('/', 1)[-1]
+    per_index = fname.index('.')
+    out_path = os.path.join(out_location, f'{fname[:per_index]}_annotated.mp4')
+    outp = av.open(out_path, 'w')
+    codec_name = stream_vid.codec_context.name
+    fps = stream_vid.codec_context.rate
+    output_stream = outp.add_stream(codec_name, str(fps))
+    output_stream.width = im_width
+    output_stream.height = im_height
+    output_stream.pix_fmt = stream_vid.codec_context.pix_fmt
+    start = time()
+    for index, frame in enumerate(container.decode(stream_vid)):
+        pil_img = frame.to_image()
+        np_img = np.array(pil_img)
+        np_img_resize = cv2.resize(np_img, (im_width, im_height))
+        np_rot = np_img_resize[:, :, ::-1]
+        small_pil_img = Image.fromarray(np_rot)
+        # np_image_2 = np.array(small_pil_img)
+        an_mg, num_oysters, _, _2z = ann_img_helper(small_pil_img, model, conf_level = conf_level)
+        tot_oysters += num_oysters
+        frame_out = av.VideoFrame.from_ndarray(an_mg, format='bgr24')
+        pkt = output_stream.encode(frame_out)
+        outp.mux(pkt)
+    end = time()
+    net_time = end - start
+    container.close()
+    outp.close()
+    ann_rate = (index / fps) / net_time # ratio of time to annotate versus length of video
+    return tot_oysters / index, net_time, out_path, ann_rate
 
 def get_model(id: int):
     
@@ -410,7 +447,6 @@ def ann_img(Raw_File_ID, Model_ID, threshold, notes = '', f_out = 'Files/Image_a
     id = get_REPLACE_ID(table='annotated_files', column_rep='Filepath')
     f_id_name_g = get_id_fname(f_out, raw_filepath, id)
     f_local = get_temp_fname(f_id_name_g)
-    print(f_local)
 
     im_f = Image.fromarray(annot)
     im_f.save(f_local)
@@ -479,9 +515,7 @@ def add_video(name, fpath, fname, notes = '', f_out = 'Files/Video_raw'):
     run_sql(f"INSERT INTO raw_files (Username, Filepath, Filename, Local_Path, Size, Type, Extension, Notes, Width, Height, Timestamp) VALUES ('{name}', '{REPLACE}', '{REPLACE}', '{REPLACE}', {fsize}, 'Video', '{ext}', '{notes}', {width}, {height}, CURRENT_TIMESTAMP);")
     id = get_REPLACE_ID(table='raw_files', column_rep='Filepath')
     f_id_name_g = get_id_fname(f_out, fname, id)
-    # print(f_id_name_g)
     temp_path = get_temp_fname(f_id_name_g)
-    # print(temp_path)
     upload_file_g(fpath, f_id_name_g)
     
     os.rename(fpath, temp_path)
@@ -494,7 +528,7 @@ def add_video(name, fpath, fname, notes = '', f_out = 'Files/Video_raw'):
     
     
 
-    cur.execute(f"INSERT INTO videos (Raw_File_ID, FPS, Color_Order) VALUES ('{id}', '{fps}', '{color_order}');")
+    run_sql(f"INSERT INTO videos (Raw_File_ID, FPS, Color_Order) VALUES ('{id}', '{fps}', '{color_order}');")
 
     return id
 
@@ -542,13 +576,10 @@ def add_roboflow(name, export_string, f_out = 'Files/Roboflow', f_weights = "Fil
     pattern_download = r'\bdownload\("([^"]+)"\)'
     download_lab = get_match(pattern_download, export_string)
     
-#     f_temp = get_temp_fname(f_out)
     folder_name = f'{workspace_lab}_{project_lab}_{version_lab}_{download_lab}'
     f_temp = os.path.join(temp_folder, folder_name)
     
     folder_g = os.path.join(f_out, folder_name)
-#     folder_roboflow = f"{f_out}/{workspace_lab}_{project_lab}_{version_lab}_{download_lab}"
-    # print(api_key_lab, workspace_lab, project_lab, version_lab, download_lab, f_temp)
     if load:
         download_roboflow(api_key_lab, workspace_lab, project_lab, version_lab, download_lab, f_temp)
     
@@ -587,9 +618,6 @@ def get_roboflow(user):
 def add_model(roboflow_ID, size_mod = 'n', epochs = 10, batch = 32, f_out = "Files/Model"):
     
     weights_path = download_weight(temp_folder, size_mod)
-    
-    
-   
     res = run_sql(f"SELECT * FROM roboflow WHERE ID = {roboflow_ID}")[-1]
     print(res)
 
@@ -637,7 +665,6 @@ def add_model(roboflow_ID, size_mod = 'n', epochs = 10, batch = 32, f_out = "Fil
 def kv_select(kvlist, label = "", reverse = False):
     KEYS = 0
     VALUES = 1
-    # print(kvlist)
     if kvlist != ([], []):
         selected = st.selectbox(
             label,
@@ -657,42 +684,5 @@ def get_type_file(ID):
     res = run_sql(f"SELECT Type FROM raw_files WHERE ID = {ID}")[-1]
     return res['Type']
 
-def ann_video_helper(input_vid, model, conf_level, out_location = '.', im_width = 416, im_height = 416):
-    tot_oysters = 0
-    tot_frame = 0
-    
-    bba = sv.BoundingBoxAnnotator()
-    la = sv.LabelAnnotator()
 
-    container = av.open(input_vid)
-    stream_vid = container.streams.video[0]
-    fname = input_vid.rsplit('/', 1)[-1]
-    per_index = fname.index('.')
-    out_path = os.path.join(out_location, f'{fname[:per_index]}_annotated.mp4')
-    outp = av.open(out_path, 'w')
-    codec_name = stream_vid.codec_context.name
-    fps = stream_vid.codec_context.rate
-    output_stream = outp.add_stream(codec_name, str(fps))
-    output_stream.width = im_width
-    output_stream.height = im_height
-    output_stream.pix_fmt = stream_vid.codec_context.pix_fmt
-    start = time()
-    for index, frame in enumerate(container.decode(stream_vid)):
-        pil_img = frame.to_image()
-        np_img = np.array(pil_img)
-        np_img_resize = cv2.resize(np_img, (im_width, im_height))
-        np_rot = np_img_resize[:, :, ::-1]
-        small_pil_img = Image.fromarray(np_rot)
-        # np_image_2 = np.array(small_pil_img)
-        an_mg, num_oysters, _, _2z = ann_img_helper(small_pil_img, model, conf_level = conf_level)
-        tot_oysters += num_oysters
-        frame_out = av.VideoFrame.from_ndarray(an_mg, format='bgr24')
-        pkt = output_stream.encode(frame_out)
-        outp.mux(pkt)
-    end = time()
-    net_time = end - start
-    container.close()
-    outp.close()
-    ann_rate = (index / fps) / net_time # ratio of time to annotate versus length of video
-    return tot_oysters / index, net_time, out_path, ann_rate
 
