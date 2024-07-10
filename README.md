@@ -52,5 +52,5 @@ The data set for these tests were collected using clips found through online, pr
 - [Training YOLOv10 for Videos](https://www.linkedin.com/posts/pyresearch_yolov10-how-to-train-for-object-detection-activity-7201118390420180992-2nX7)
 - [How to Start a Google Storage Bucket](https://medium.com/google-cloud/automating-google-cloud-storage-management-with-python-92ba64ec8ea8)
 - [Link to OddAI Github](https://github.com/michaelalt2304/oddai_website)
-Please reach out to Michael Straus (mjstraus2304@gmail.com) with your Github account email for permission first, since OddAI is private for Google key integrity regions.
+Please reach out to Michael Straus (mjstraus2304@gmail.com) with your Github account email for permission first, since OddAI is private for Google key integrity reasons.
 
