@@ -1,0 +1,113 @@
+.bottom {
+    display: flex;
+    flex-direction: column;
+    background-color: rgb(0, 0, 0);
+    position: static;
+    height: 400px;
+    margin-bottom: 0px;
+    left: 0px;
+    right: 0px;
+    
+    color: white;
+    
+}
+
+.footer {
+    display: flex;
+    flex: 1;
+    height: 300px;
+    border-left-style: solid;
+    border-left-width: 0px;
+    border-right-style: solid;
+    border-right-width: 0px;
+    border-top-style: solid;
+    border-top-width: 3px;
+    border-top-color: white;
+    border-bottom-style: solid;
+    border-bottom-width: 3px;
+    border-bottom-color: white;
+    color: white;
+    background-color: black;
+    padding-top: 10px;
+    margin-left: 72px;
+    margin-right: 72px;
+    
+}
+
+.footer-elements {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: large;
+    font-weight: bold;
+    flex: 1;
+
+}
+
+.footer-links {
+    cursor: pointer;
+    color: white;
+    background-color: black;
+    border: none;
+    transition: text-decoration 0.75s;
+}
+
+.footer-links:hover {
+    text-decoration: underline;
+
+}
+
+.gull-icon {
+    width: 120px;
+    height: 60px;
+}
+
+.social-links {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    margin-top: 25px;
+    margin-left: 72px;
+    margin-right: 72px;
+    
+}
+
+
+.social-link-element {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 70px;
+    height: 70px;
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+.social-icons {
+    width: 50px;
+    height: 50px;
+}
+
+.Social-button {
+    flex: 1;
+    border: solid;
+    background-color: white;
+    border-radius: 35px;
+    margin-left: 20px;
+    margin-right: 20px;
+    padding-top: 9px;
+    padding-bottom: 9px;
+    padding-left: 10px;
+    padding-right: 10px;
+    transition: padding-left 0.75s, padding-right 0.75s, margin-left 0.75s, margin-right 0.75s;
+  }
+  .Social-button:hover {
+    margin-left: 5px;
+    margin-right: 5px;
+    padding-left: 28px;
+    padding-right: 28px;
+  }
+
+  .ender {
+    height: 30px;
+  }
