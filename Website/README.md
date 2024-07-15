@@ -22,4 +22,4 @@ To start the react app, input `npx create-react-app (DIR_NAME)` in the terminal.
 *Note: The ReactJS responds directly to the App.js file, the index files created within the creat don't serve a purpose in this project
 and the web_structure directory is used for organization. If you run into any errors, the 2 most likely solutions are making sure your ports line up
 (the post for the forms should listen to the backend port, not the front end) and make sure you use syntax specific to ReactJS,
-although it is a JAvaScrpit Application, syntax from either do not mix well together.
+although it is a JAvaScrpit Application, syntax from either do not mix well together.*
