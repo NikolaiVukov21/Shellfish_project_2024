@@ -4,25 +4,32 @@
 - [ ] ~~New: Fixed Error With No Files or Directory found in Jupyter Code~~
 - [X] Retrain Models with Videos
 - [X] Get Confidence level of Oysters
-- [ ] ~~Get orientation of Oysters~~
+- [ ] Get orientation of Oysters
 
 ## Website:
 - [x] ~~Create Dropbox Link to Process files~~
-- [X] Create a website Frame
-- [X] Create Input for imagines on website
-- [X] Create SQL database
-- [ ] Implement Yolov10 code into website
-- [ ] Create Output for process imagine
-- [X] Create Powerpoint For website
+- [X] Create a website Frame (Odd.ai & React App)
+- [X] Create Input for imagines on website (Odd.ai & React App)
+- [X] Create SQL database (React App)
+- [X] Implement Yolov10 code into website (Odd.ai)
+- [X] Create Output for process imagine (Odd.ai)
+- [X] Create Powerpoint For website (React App)
 
 
 ## Reports:
 - [X] Write Progress report I | *Due: 6/27/24*
 - [X] Write Progress report II| *Due: 7/11/24*
-- [ ] Write Final Report | *Due: 8/6/24*
-- [ ] Write Conference paper
+- [X] Write Final Report | *Due: 8/6/24*
+- [X] Write Conference paper
 
 
 ## Fun:
 - [X] Take off 4th of july
-- [ ] 
+- [ ] Have Fun
+
+## Misc:
+- [X] Contact HornPoint Hatchery
+- [ ] Figure out how to detect oyster disease
+- [ ] Figure out how to determine oyster age
+- [ ] Expand DataBase
+- [ ] Expand Application
