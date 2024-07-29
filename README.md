@@ -33,9 +33,14 @@ Next, the group was able to determine the orientation to allow for more accurate
 
 ## Methods:
 
-
 ### - DataSet:
-The data set for these tests were collected using clips found through online, primarily through youtube channels (All credits can be found in References). In total we were able to collect 8 videos that ranged from a few seconds still photos of a single oyster to long moving videos of multiple oysters.
+The final dataset used can be found [here](https://app.roboflow.com/oyster-pt-3/reu_oyster_2024_improved/6). This dataset was formed by combining imagines found from the universal workspace [Bivalves Detection by DigiAqua](https://universe.roboflow.com/search?q=oyster) and media gathered by the 2022-2024 NSF REU project.
+
+The dataset for this project was initially a combination of imagines found online through various sources like [Youtube](https://www.youtube.com/) and [Google](https://www.google.com/). The group in 2023 expanded this dataset by adding more imagines as well of videos that they took during their trip to [Horn Point Hatchery](https://hatchery.hpl.umces.edu/).This group also added 890 oysterless medias into the dataset to deter the model from commiting false postives. Lastly, in 2024 our group tried to expand this dataset by adding frames from videos that we've gather through youtube to expand the machine learning to better handel video annontations. We also added more oysterless photos into the dataset, finding photos that ranged from a single crush can of soda to piles of trash and debris underwater.
+
+  While this was a good start, the model constantly failed to reach about 50% in [precision, recall,](https://blog.roboflow.com/precision-and-recall/) and [Average Precision](https://blog.roboflow.com/mean-average-precision/). 
+
+
 ### - Training:
 
 ### - Evaluation:
