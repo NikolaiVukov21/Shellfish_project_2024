@@ -42,7 +42,7 @@ The data set for these tests were collected using clips found through online, pr
 
 ### - Website:
 
-### - Results 
+### - Results: 
 
 ## Additional Links & Resources:
 - [3D boundary boxing paper](https://arxiv.org/pdf/1612.00496)
@@ -56,4 +56,8 @@ The data set for these tests were collected using clips found through online, pr
 - [How to Start a Google Storage Bucket](https://medium.com/google-cloud/automating-google-cloud-storage-management-with-python-92ba64ec8ea8)
 - [Link to OddAI Github](https://github.com/michaelalt2304/oddai_website)
 Please reach out to Michael Straus (mjstraus2304@gmail.com) with your Github account email for permission first, since OddAI is private for Google key integrity reasons.
+
+## Getting Started:
+
+To get started, please go to [Getting Started](https://github.com/NikolaiVukov21/Shellfish_project_2024/blob/Grand-Master/GettingStarted.md)
 
