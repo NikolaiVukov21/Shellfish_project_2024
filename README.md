@@ -14,9 +14,9 @@
 Identification of Oysters in Imagines and Videos using Machine Learning
 
 ## Contributors:
- - Joshua Essandoh  (Computer Engineer, Virgina Tech)
- - Michael Straus  (Computer Science, Columbia University)
- - Nikolai Vukov   (Statistics, Salisbury University)
+ - Joshua Essandoh  (Computer Engineer, Virgina Tech), jessandoh7@vt.edu
+ - Michael Straus  (Computer Science, Columbia University), mjs2435@columbia.edu
+ - Nikolai Vukov   (Statistics, Salisbury University), nvukov1@gulls.salisbury.edu
 
 ## Previous Work Done:
  The groups before us were able to establish code using an older version of YOLO being YOLOv5. They were able to train YOLOv5 using over 800 imagines that they collected and annotated using [Roboflow](https://roboflow.com/) These imagines depicts oysters in three states (Closed,Semi-open,fully-open) within different environments. They were also able to address the problem of negative coordinate values by writting a shell script. They used [Google Colab](https://colab.research.google.com/) to conduct the trainning and [precision](https://developers.google.com/machine-learning/crash-course/classification/precision-and-recall), [recall](https://developers.google.com/machine-learning/crash-course/classification/precision-and-recall), [average precision (AP)](https://link.springer.com/referenceworkentry/10.1007/978-0-387-39940-9_482), and [mean average precision (mAP)](https://www.v7labs.com/blog/mean-average-precision#:~:text=Average%20Precision%20is%20calculated%20as,mAP%20varies%20in%20different%20contexts.) to conduct the evaluation.
@@ -33,11 +33,14 @@ Next, the group was able to determine the orientation to allow for more accurate
 
 ## Methods:
 
+
 ### - DataSet:
-The data set for these tests were collected using clips found through online, primarily through youtube channels (All credits can be found in References). In total we were able to collect _ videos that ranged from a few seconds still photos of a single oyster to long moving videos of multiple oysters.
+The data set for these tests were collected using clips found through online, primarily through youtube channels (All credits can be found in References). In total we were able to collect 8 videos that ranged from a few seconds still photos of a single oyster to long moving videos of multiple oysters.
 ### - Training:
 
 ### - Evaluation:
+
+### - Website:
 
 ### - Results 
 
