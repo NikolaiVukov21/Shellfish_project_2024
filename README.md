@@ -53,11 +53,20 @@ The results from this trainning can be found in the *results* section.
 We used the metrics of [precision, recall,](https://blog.roboflow.com/precision-and-recall/) and [mean Average Precision (mAP)](https://blog.roboflow.com/mean-average-precision/) to evaulate the model's performance. Initially we focused on recall and precision to measure our models but we realized that the previous group used precision and mAP to eveluate their model's performances and so for the sake of comparision we changed our main metrics to precision and mAP.
 
 #### Mean Average Precision
+![Recall, Precession,mAP](https://github.com/user-attachments/assets/7352ca22-8f53-4186-beca-ffc3362e6909)
 
 Besides these metrics, we also looked at [trainning lost](https://machinelearningmastery.com/loss-and-loss-functions-for-training-deep-learning-neural-networks/). Since supervised machine learning utilizes linear regression, we needed a way to measure how different the model is from the true model. This is where the lost function comes in and the lost function for our best model is shown below:
-#### Training Lost
 
+#### Training Lost
+![Lost_Screenshot](https://github.com/user-attachments/assets/66688f4c-2cfc-434f-ba02-e708cb815941)
 ### - Website:
+We wanted to adapt this project to allow anyone to access the prorgram. We decided to do this via a series of website. The visual aspect of this site is through a javascript library called ["React"](https://react.dev/). From here we were able to create a informative interface that gives background and insight into what our porject is about, a quick history of it as well as basic functions. The main functionality of the website is made through a program called ["Stream lit"](https://streamlit.io/). This program takes data scripts and turns it into websites. From the Streamlit website we were able to implement the functioniality of live annontation, uploadedable files, fast annontations and a gallery as well as constantly update the models to the most recent model (model 63). 
+
+Links to both sites are given below:
+
+[Joshua's React Website](https://oysterreu.onrender.com/)
+
+[Michael's Streamlit Website](https://odd-ai.streamlit.app/)
 
 ### - Results: 
 
