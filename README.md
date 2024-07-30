@@ -29,7 +29,6 @@ Next, the group was able to determine the orientation to allow for more accurate
 - [Underwater image processing](https://www.sciencedirect.com/science/article/pii/S0923596520302137)
 - [Oyster detection system](https://github.com/bsadr/oyster-detection)
 - [DenseDepth](https://github.com/ialhashim/DenseDepth)
-- #[Remember to give credit to YOLOV8](Insert Yolov8_github link here)
 
 ## Methods:
 
