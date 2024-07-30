@@ -86,5 +86,5 @@ Please reach out to Michael Straus (mjstraus2304@gmail.com) with your Github acc
 
 ## Getting Started:
 
-To get started, please go to [Getting Started](https://github.com/NikolaiVukov21/Shellfish_project_2024/blob/Grand-Master/GettingStarted.md)
+To get started, please email mjstraus2304@gmail.com for [access to the OddAI repository](https://github.com/michaelalt2304/oddai_website)
 
