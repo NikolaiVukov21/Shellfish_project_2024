@@ -4,7 +4,7 @@
 - [ ] ~~New: Fixed Error With No Files or Directory found in Jupyter Code~~
 - [X] Retrain Models with Videos
 - [X] Get Confidence level of Oysters
-- [ ] Get orientation of Oysters
+- [X] Get orientation of Oysters
 
 ## Website:
 - [x] ~~Create Dropbox Link to Process files~~
@@ -29,7 +29,7 @@
 
 ## Misc:
 - [X] Contact HornPoint Hatchery
-- [ ] Figure out how to detect oyster disease
-- [ ] Figure out how to determine oyster age
-- [ ] Expand DataBase
+- [X] Figure out how to detect oyster disease
+- [X] Figure out how to determine oyster age
+- [X] Expand DataBase
 - [ ] Expand Application
